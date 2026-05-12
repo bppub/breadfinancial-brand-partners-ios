@@ -116,3 +116,12 @@ public struct ContextRequestBody: Codable {
         self.UPQ_CHECKOUT_PARAMS = UPQ_CHECKOUT_PARAMS
     }
 }
+
+extension ContextRequestBody {
+    func copy(upqParams: String? = nil, upqCheckoutParams: String? = nil) -> ContextRequestBody {
+        return ContextRequestBody(
+            UPQ_PARAMS: upqParams,
+            UPQ_CHECKOUT_PARAMS: upqCheckoutParams,
+        )
+    }
+}
