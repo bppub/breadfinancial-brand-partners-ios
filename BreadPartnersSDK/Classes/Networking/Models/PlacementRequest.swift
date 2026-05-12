@@ -43,7 +43,7 @@ public struct ContextRequestBody: Codable {
     let PREQUAL_ID: String?
     let PREQUAL_CREDIT_LIMIT: String?
     let LOCATION: String?
-    let PRICE: Double?
+    let PRICE: Int64?
     let EXISTING_CH: Bool?
     let CARDHOLDER_TIER: String?
     let STORE_NUMBER: String?
@@ -58,7 +58,8 @@ public struct ContextRequestBody: Codable {
     let subchannel: String?
     let CMP: String?
     let ALLOW_CHECKOUT: Bool?
-    let UQP_PARAMS: String?
+    let UPQ_PARAMS: String?
+    let UPQ_CHECKOUT_PARAMS: String?
     let embeddedUrl: String?
 
     public init(
@@ -69,7 +70,7 @@ public struct ContextRequestBody: Codable {
         PREQUAL_ID: String? = nil,
         PREQUAL_CREDIT_LIMIT: String? = nil,
         LOCATION: String? = nil,
-        PRICE: Double? = nil,
+        PRICE: Int64? = nil,
         EXISTING_CH: Bool? = nil,
         CARDHOLDER_TIER: String? = nil,
         STORE_NUMBER: String? = nil,
@@ -84,7 +85,8 @@ public struct ContextRequestBody: Codable {
         subchannel: String? = nil,
         CMP: String? = nil,
         ALLOW_CHECKOUT: Bool? = nil,
-        UQP_PARAMS: String? = nil,
+        UPQ_PARAMS: String? = nil,
+        UPQ_CHECKOUT_PARAMS: String? = nil,
         embeddedUrl: String? = nil
     ) {
         self.SDK_TID = SDK_TID
@@ -109,7 +111,8 @@ public struct ContextRequestBody: Codable {
         self.subchannel = subchannel
         self.CMP = CMP
         self.ALLOW_CHECKOUT = ALLOW_CHECKOUT
-        self.UQP_PARAMS = UQP_PARAMS
+        self.UPQ_PARAMS = UPQ_PARAMS
         self.embeddedUrl = embeddedUrl
+        self.UPQ_CHECKOUT_PARAMS = UPQ_CHECKOUT_PARAMS
     }
 }

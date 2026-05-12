@@ -31,7 +31,7 @@ class OpenExperienceController: UIViewController {
                 subTotal: CurrencyValue(currency: "USD", value: 150000),
                 totalDiscounts: CurrencyValue(currency: "USD", value: 0),
                 totalPrice: CurrencyValue(
-                    currency: "USD", value: Double(price ?? 0)),
+                    currency: "USD", value: Int64(price ?? 0)),
                 totalShipping: CurrencyValue(currency: "USD", value: 0),
                 totalTax: CurrencyValue(currency: "USD", value: 0),
                 discountCode: "string",

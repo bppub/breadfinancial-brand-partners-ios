@@ -59,7 +59,22 @@ class PlacementRequestBuilder {
             CMP: merchantConfiguration?.campaignID.takeIfNotEmpty(),
             ALLOW_CHECKOUT: placementData?.allowCheckout ?? false
         )
-
+        
+        if(placementData?.allowCheckout == true){
+            var upqCheckoutData = mapUnifiedPlacementContextToUpqCheckout()
+            
+            var upqPathData = pathForUnifiedPrequalCheckout()
+            
+           
+        } else {
+            // do that
+            var upqData = mapUnifiedPlacementContextToUPQCommonData()
+            
+            var upqPathData = pathForUnifiedPrequalCheckout()
+        }
+            
+            
+            
         let placement = PlacementRequestBody(
             id: placementData?.placementId,
             context: context
@@ -74,4 +89,10 @@ class PlacementRequestBuilder {
             brandId: brandId
         )
     }
+    
+    func mapUnifiedPlacementContextToUpqCheckout() {}
+    
+    func pathForUnifiedPrequalCheckout() {}
+    
+    func mapUnifiedPlacementContextToUPQCommonData() {}
 }

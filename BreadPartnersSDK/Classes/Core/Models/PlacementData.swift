@@ -31,13 +31,21 @@ public class PlacementData {
     public var order: Order?
     public var defaultSelectedCardKey: String?
     public var selectedCardKey: String?
-
+    public var upqInSessionToken: String?
+    public var financingBuyerId: String?
+    public var prequalificationId: String?
+    public var prequalCreditLimit: String?
+    
     public init(
         financingType: BreadPartnersFinancingType? = nil,
         locationType: BreadPartnersLocationType? = nil,
         placementId: String? = nil,
-        domID: String? = nil, allowCheckout: Bool? = nil, order: Order? = nil,
-        defaultSelectedCardKey: String? = nil, selectedCardKey: String? = nil
+        domID: String? = nil,
+        allowCheckout: Bool? = nil,
+        order: Order? = nil,
+        defaultSelectedCardKey: String? = nil,
+        selectedCardKey: String? = nil
+        
     ) {
         self.financingType = financingType
         self.locationType = locationType
@@ -109,14 +117,19 @@ public class Order {
     public var pickupInformation: PickupInformation?
     public var fulfillmentType: String?
     public var items: [Item]?
+    public var bnplEligible: Bool?
 
     public init(
-        subTotal: CurrencyValue? = nil, totalDiscounts: CurrencyValue? = nil,
+        subTotal: CurrencyValue? = nil,
+        totalDiscounts: CurrencyValue? = nil,
         totalPrice: CurrencyValue? = nil,
-        totalShipping: CurrencyValue? = nil, totalTax: CurrencyValue? = nil,
+        totalShipping: CurrencyValue? = nil,
+        totalTax: CurrencyValue? = nil,
         discountCode: String? = nil,
         pickupInformation: PickupInformation? = nil,
-        fulfillmentType: String? = nil, items: [Item]? = nil
+        fulfillmentType: String? = nil,
+        items: [Item]? = nil,
+        bnplEligible: Bool? = nil
     ) {
         self.subTotal = subTotal
         self.totalDiscounts = totalDiscounts
@@ -127,15 +140,16 @@ public class Order {
         self.pickupInformation = pickupInformation
         self.fulfillmentType = fulfillmentType
         self.items = items
+        self.bnplEligible = bnplEligible
     }
 }
 
 /// Specifies a currency value.
 public class CurrencyValue {
     public var currency: String?
-    public var value: Double?
+    public var value: Int64?
 
-    public init(currency: String? = nil, value: Double? = nil) {
+    public init(currency: String? = nil, value: Int64? = nil) {
         self.currency = currency
         self.value = value
     }
