@@ -132,8 +132,8 @@ class PlacementRequestBuilder {
         )
         
         // Map order and check BNPL eligibility
-        let newOrder = mapUnifiedPlacementOrderToOrder(placementData?.order)
-        checkBnplEligibility(newOrder)
+        var newOrder = mapUnifiedPlacementOrderToOrder(placementData?.order)
+        checkBnplEligibility(&newOrder)
         
         // Map shipping address
         let shippingAddress = mapUnifiedPlacementContextToUPQAddressRequest(
@@ -153,8 +153,24 @@ class PlacementRequestBuilder {
             ]
         )
     }
-    
-    private func checkBnplEligibility(_ order: [String: Any?]) {}
+
+    /// Checks BNPL eligibility based on item categories.
+    /// Sets bnplEligible to false if any item has an ineligible category.
+    ///
+    /// - Parameter orderMap: Dictionary representing the order object to check
+    private func checkBnplEligibility(_ orderMap: inout [String: Any?]) {
+        guard !orderMap.isEmpty else { return }
+        
+        guard let items = orderMap["items"] as? [[String: Any?]] else { return }
+        
+        for item in items {
+            if let itemCategory = (item["category"] as? String)?.lowercased(),
+               ineligibleItemCategories.contains(itemCategory) {
+                orderMap["bnplEligible"] = false
+                return
+            }
+        }
+    }
     
     /// Maps buyer shipping address to UPQ address.
     ///

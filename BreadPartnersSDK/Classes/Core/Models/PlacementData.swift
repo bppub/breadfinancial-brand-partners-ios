@@ -257,3 +257,8 @@ public class Item {
         self.fulfillmentType = fulfillmentType
     }
 }
+
+/// Categories that are ineligible for BNPL financing
+private let ineligibleItemCategories: Set<String> = [
+    "non-leasable", "nonleasable"
+]
