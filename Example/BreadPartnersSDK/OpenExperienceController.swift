@@ -25,8 +25,8 @@ class OpenExperienceController: UIViewController {
         let givenName = "John"
         let familyName = "Doe"
         let additionalName = "Smith"
-        let email = "john.doe@gmail.com"
-        let phone = "3474351160"
+        let email = "joncarlos.tavarez.1163@gmail.com"
+        let phone = "3474351163"
         let postalCode = "11222"
         let region = "NY"
         let country = "US"
@@ -34,7 +34,7 @@ class OpenExperienceController: UIViewController {
         let address2 = "Apt. 2B"
         let locality = "Brooklyn"
         let birthDate = "1990-01-01"
-        let subTotal: Int64 = 299999
+        let subTotal: Int64 = 399999
         let totalTax: Int64 = 14999
         let totalShipping: Int64 = 0
         let totalDiscounts: Int64 = 0
@@ -69,7 +69,28 @@ class OpenExperienceController: UIViewController {
                     email: email
                 ),
                 fulfillmentType: "PICKUP",
-                items: []))
+                items: [
+                    Item(
+                        name: "Product 1",
+                        category: "Electronics",
+                        quantity: 1,
+                        unitPrice: CurrencyValue(currency: "USD", value: 149999),
+                        unitTax: CurrencyValue(currency: "USD", value: 7499),
+                        sku: "SKU-001",
+                        shippingCost: CurrencyValue(currency: "USD", value: 0),
+                        fulfillmentType: "PICKUP"
+                    ),
+                    Item(
+                        name: "Product 2",
+                        category: "Accessories",
+                        quantity: 1,
+                        unitPrice: CurrencyValue(currency: "USD", value: 150000),
+                        unitTax: CurrencyValue(currency: "USD", value: 7500),
+                        sku: "SKU-002",
+                        shippingCost: CurrencyValue(currency: "USD", value: 0),
+                        fulfillmentType: "PICKUP"
+                    )
+                ]))
 
         let placementsConfiguration = PlacementConfiguration(
             placementData: placementData
@@ -92,7 +113,8 @@ class OpenExperienceController: UIViewController {
                     postalCode: postalCode
                 ),
                 shippingAddress: nil
-            ), loyaltyID: loyaltyId,
+            ),
+            loyaltyID: loyaltyId,
             storeNumber: "1234567",
             env: env,
             channel: channel,
@@ -100,7 +122,6 @@ class OpenExperienceController: UIViewController {
         )
 
         Task {
-
             await BreadPartnersSDK.shared.setup(
                 environment: env ?? BreadPartnersEnvironment.stage,
                 integrationKey: brandId ?? "",
@@ -122,7 +143,7 @@ class OpenExperienceController: UIViewController {
                 case .onSDKEventLog(let log):
                     print("SDK Log: \(log)")
                 default:
-                    break
+                    print("SDK event: \(event)")
                 }
 
             }

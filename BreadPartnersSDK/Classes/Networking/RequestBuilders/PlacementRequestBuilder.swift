@@ -16,7 +16,6 @@ import Foundation
 /// necessary details like pricing and settings. It uses given configurations to
 /// build and organize placement data..
 class PlacementRequestBuilder {
-    private var integrationKey: String = ""
     private var placements: [PlacementRequestBody] = []
     private var brandId: String = ""
 
@@ -61,7 +60,7 @@ class PlacementRequestBuilder {
         )
         
         if(placementData?.allowCheckout == true){
-            var upqCheckoutData = mapUnifiedPlacementContextToUpqCheckout(
+            let upqCheckoutData = mapUnifiedPlacementContextToUpqCheckout(
                 placementData: placementData,
                 merchantConfiguration: merchantConfiguration,
                 
@@ -69,12 +68,11 @@ class PlacementRequestBuilder {
             
             let upqPathData = pathForUnifiedPrequalCheckout(
                 initialData: upqCheckoutData,
-                clientKey: integrationKey
+                clientKey: brandId
             ).queryString
             
-            context = context.copy(
-                upqCheckoutParams: upqPathData
-            )
+            context.UPQ_CHECKOUT_PARAMS = upqPathData
+     
         } else {
             let upqData = mapUnifiedPlacementContextToUPQCommonData(
                 placementData: placementData,
@@ -83,10 +81,10 @@ class PlacementRequestBuilder {
             
             let upqPathData = pathForUnifiedPrequal(
                 initialData: upqData,
-                clientKey: integrationKey
+                clientKey: brandId
             ).queryString
             
-            context = context.copy(upqParams: upqPathData)
+            context.UPQ_PARAMS = upqPathData
         }
             
             
@@ -185,7 +183,7 @@ class PlacementRequestBuilder {
         guard let order = order else { return [:] }
         
         var orderData: [String: Any?] = [:]
-        
+
         // Map basic order fields
         let basicOrderData: [String: Any?] = [
             "bnplEligible": order.bnplEligible,
@@ -426,6 +424,14 @@ extension Dictionary where Key == String, Value == Any? {
                 stringValue = String(format: "%.2f", doubleVal)
             } else if let numVal = value as? NSNumber {
                 stringValue = numVal.stringValue
+            } else if let dictVal = value as? [String: Any?],
+                      let jsonData = try? JSONSerialization.data(withJSONObject: unwrapForJSON(dictVal)),
+                      let jsonString = String(data: jsonData, encoding: .utf8) {
+                stringValue = jsonString
+            } else if let arrVal = value as? [Any],
+                      let jsonData = try? JSONSerialization.data(withJSONObject: unwrapForJSON(arrVal)),
+                      let jsonString = String(data: jsonData, encoding: .utf8) {
+                stringValue = jsonString
             } else {
                 stringValue = String(describing: value)
             }
@@ -492,19 +498,19 @@ struct UPQAddressRequest {
 /// - Returns: Double value in dollars rounded to 2 decimal places, or nil if input is nil
 private func fromMoneyToDollars(_ moneyValue: Int64?) -> Double? {
     guard let moneyValue = moneyValue else { return nil }
-    var decimal = Decimal(moneyValue) / Decimal(100)
-    var rounded = Decimal()
-    NSDecimalRound(&rounded, &decimal, 2, .plain)
-    return Double(truncating: rounded as NSDecimalNumber)
+
+    return Double(moneyValue) / 100.0
 }
 
-/// Converts an object to JSON string
+
+/// Converts an object to JSON string, unwrapping Any? values before serialization
 /// - Parameter object: The object to convert
 /// - Returns: JSON string representation
 private func stringifyJSON(_ object: Any) -> String {
+    let unwrapped = unwrapForJSON(object)
     do {
         let jsonData = try JSONSerialization.data(
-            withJSONObject: object,
+            withJSONObject: unwrapped,
             options: [.prettyPrinted, .sortedKeys]
         )
         if let jsonString = String(data: jsonData, encoding: .utf8) {
@@ -514,6 +520,33 @@ private func stringifyJSON(_ object: Any) -> String {
         print("Error converting object to JSON: \(error.localizedDescription)")
     }
     return ""
+}
+
+/// Recursively unwraps Any? values for JSON serialization
+/// - Parameter value: The value to unwrap
+/// - Returns: A JSON-safe representation of the value
+private func unwrapForJSON(_ value: Any) -> Any {
+    if let dict = value as? [String: Any?] {
+        var result: [String: Any] = [:]
+        for (k, v) in dict {
+            if let v = v {
+                let unwrapped = unwrapForJSON(v)
+                if let doubleVal = unwrapped as? Double {
+                    result[k] = Double(String(format: "%.2f", doubleVal)) ?? doubleVal
+                } else {
+                    result[k] = unwrapped
+                }
+            }
+        }
+        return result
+    } else if let array = value as? [Any] {
+        return array.map { unwrapForJSON($0) }
+    } else if let array = value as? [[String: Any?]] {
+        return array.map { unwrapForJSON($0) }
+    } else if let double = value as? Double {
+        return Double(String(format: "%.2f", double)) ?? double
+    }
+    return value
 }
 
 

@@ -58,8 +58,8 @@ public struct ContextRequestBody: Codable {
     let subchannel: String?
     let CMP: String?
     let ALLOW_CHECKOUT: Bool?
-    let UPQ_PARAMS: String?
-    let UPQ_CHECKOUT_PARAMS: String?
+    var UPQ_PARAMS: String?
+    var UPQ_CHECKOUT_PARAMS: String?
     let embeddedUrl: String?
 
     public init(
