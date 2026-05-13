@@ -147,9 +147,9 @@ public class Order {
 /// Specifies a currency value.
 public class CurrencyValue {
     public var currency: String?
-    public var value: Int?
+    public var value: Int64?
 
-    public init(currency: String? = nil, value: Int? = nil) {
+    public init(currency: String? = nil, value: Int64? = nil) {
         self.currency = currency
         self.value = value
     }

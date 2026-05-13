@@ -34,11 +34,11 @@ class OpenExperienceController: UIViewController {
         let address2 = "Apt. 2B"
         let locality = "Brooklyn"
         let birthDate = "1990-01-01"
-        let subTotal: Int = 299999
-        let totalTax = Int(Double(subTotal) * 0.05)
-        let totalShipping: Int = 0
-        let totalDiscounts: Int = 0
-        let totalPrice = (subTotal + totalTax + totalShipping) - totalDiscounts
+        let subTotal: Int64 = 299999
+        let totalTax: Int64 = 14999
+        let totalShipping: Int64 = 0
+        let totalDiscounts: Int64 = 0
+        let totalPrice: Int64 = (subTotal + totalTax + totalShipping) - totalDiscounts
 
         let placementData = PlacementData(
             financingType: financingType,

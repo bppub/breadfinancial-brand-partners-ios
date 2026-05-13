@@ -422,6 +422,8 @@ extension Dictionary where Key == String, Value == Any? {
                 stringValue = stringVal
             } else if let boolVal = value as? Bool {
                 stringValue = boolVal ? "true" : "false"
+            } else if let doubleVal = value as? Double {
+                stringValue = String(format: "%.2f", doubleVal)
             } else if let numVal = value as? NSNumber {
                 stringValue = numVal.stringValue
             } else {
@@ -488,19 +490,12 @@ struct UPQAddressRequest {
 ///
 /// - Parameter moneyValue: Long value in cents
 /// - Returns: Double value in dollars rounded to 2 decimal places, or nil if input is nil
-private func fromMoneyToDollars(_ moneyValue: Int?) -> Double? {
+private func fromMoneyToDollars(_ moneyValue: Int64?) -> Double? {
     guard let moneyValue = moneyValue else { return nil }
-    
-    let myDouble = Double(moneyValue) / 100
-    
-    let formatter = NumberFormatter()
-    formatter.minimumFractionDigits = 2
-    
-    guard let formattedString = formatter.string(from: NSNumber(value: myDouble)) else { return nil }
-
-    
-    return Double(formattedString)
-
+    var decimal = Decimal(moneyValue) / Decimal(100)
+    var rounded = Decimal()
+    NSDecimalRound(&rounded, &decimal, 2, .plain)
+    return Double(truncating: rounded as NSDecimalNumber)
 }
 
 /// Converts an object to JSON string
