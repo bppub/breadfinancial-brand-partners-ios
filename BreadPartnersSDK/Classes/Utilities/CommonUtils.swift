@@ -225,3 +225,125 @@ actor CommonUtils: NSObject {
         return "\(deviceModel): \(systemName) \(systemVersion)" // iPhone; iOS 18.2
     }
 }
+
+/// Converts Money value to dollars (divides by 100).
+///
+/// - Parameter moneyValue: Long value in cents
+/// - Returns: Double value in dollars rounded to 2 decimal places, or nil if input is nil
+public func fromMoneyToDollars(_ moneyValue: Int64?) -> Double? {
+    guard let moneyValue = moneyValue else { return nil }
+
+    return Double(moneyValue) / 100.0
+}
+
+
+/// Converts an object to JSON string, unwrapping Any? values before serialization
+/// - Parameter object: The object to convert
+/// - Returns: JSON string representation
+public func stringifyJSON(_ object: Any) -> String {
+    let unwrapped = unwrapForJSON(object)
+    do {
+        let jsonData = try JSONSerialization.data(
+            withJSONObject: unwrapped,
+            options: [.prettyPrinted, .sortedKeys]
+        )
+        if let jsonString = String(data: jsonData, encoding: .utf8) {
+            return jsonString
+        }
+    } catch {
+        print("Error converting object to JSON: \(error.localizedDescription)")
+    }
+    return ""
+}
+
+/// Recursively unwraps Any? values for JSON serialization
+/// - Parameter value: The value to unwrap
+/// - Returns: A JSON-safe representation of the value
+public func unwrapForJSON(_ value: Any) -> Any {
+    if let dict = value as? [String: Any?] {
+        var result: [String: Any] = [:]
+        for (k, v) in dict {
+            if let v = v {
+                let unwrapped = unwrapForJSON(v)
+                if let doubleVal = unwrapped as? Double {
+                    result[k] = Double(String(format: "%.2f", doubleVal)) ?? doubleVal
+                } else {
+                    result[k] = unwrapped
+                }
+            }
+        }
+        return result
+    } else if let array = value as? [Any] {
+        return array.map { unwrapForJSON($0) }
+    } else if let array = value as? [[String: Any?]] {
+        return array.map { unwrapForJSON($0) }
+    } else if let double = value as? Double {
+        return Double(String(format: "%.2f", double)) ?? double
+    }
+    return value
+}
+
+
+// MARK: - Dictionary Extension for Query String Conversion
+extension Dictionary where Key == String, Value == Any? {
+    /// Converts dictionary to URL query string format
+    /// - Returns: Query string (e.g., "key1=value1&key2=value2")
+    func toQueryString() -> String {
+        let queryItems = self.compactMap { key, value -> String? in
+            guard let value = value else { return nil }
+            
+            let stringValue: String
+            if let stringVal = value as? String {
+                stringValue = stringVal
+            } else if let boolVal = value as? Bool {
+                stringValue = boolVal ? "true" : "false"
+            } else if let doubleVal = value as? Double {
+                stringValue = String(format: "%.2f", doubleVal)
+            } else if let numVal = value as? NSNumber {
+                stringValue = numVal.stringValue
+            } else if let dictVal = value as? [String: Any?],
+                      let jsonData = try? JSONSerialization.data(withJSONObject: unwrapForJSON(dictVal)),
+                      let jsonString = String(data: jsonData, encoding: .utf8) {
+                stringValue = jsonString
+            } else if let arrVal = value as? [Any],
+                      let jsonData = try? JSONSerialization.data(withJSONObject: unwrapForJSON(arrVal)),
+                      let jsonString = String(data: jsonData, encoding: .utf8) {
+                stringValue = jsonString
+            } else {
+                stringValue = String(describing: value)
+            }
+            
+            // URL encode the value
+            guard let encodedValue = stringValue.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
+                return nil
+            }
+            
+            return "\(key)=\(encodedValue)"
+        }
+        
+        return queryItems.joined(separator: "&")
+    }
+    
+    /// Merges source dictionaries into this dictionary, only including defined and non-empty values.
+    ///
+    /// - Parameter sources: One or more source dictionaries to merge from
+    /// - Returns: Self with merged values
+    @discardableResult
+    mutating func assignDefined(_ sources: [String: Any?]...) -> [String: Any?] {
+        for source in sources {
+            if source.isEmpty { continue }
+            
+            for (key, value) in source {
+                // Only add if value is not nil and not an empty string
+                if let stringValue = value as? String {
+                    if !stringValue.isEmpty {
+                        self[key] = value
+                    }
+                } else if value != nil {
+                    self[key] = value
+                }
+            }
+        }
+        return self
+    }
+}
