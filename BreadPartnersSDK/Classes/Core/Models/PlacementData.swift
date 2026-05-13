@@ -115,7 +115,7 @@ public class Order {
     public var totalTax: CurrencyValue?
     public var discountCode: String?
     public var pickupInformation: PickupInformation?
-    public var fulfillmentType: String?
+    public var fulfillmentType: OrderFulfillmentType?
     public var items: [Item]?
     public var bnplEligible: Bool?
 
@@ -127,7 +127,7 @@ public class Order {
         totalTax: CurrencyValue? = nil,
         discountCode: String? = nil,
         pickupInformation: PickupInformation? = nil,
-        fulfillmentType: String? = nil,
+        fulfillmentType: OrderFulfillmentType? = nil,
         items: [Item]? = nil,
         bnplEligible: Bool? = nil
     ) {
@@ -227,18 +227,24 @@ public class Item {
     public var shippingDescription: String?
     public var shippingTrackingNumber: String?
     public var shippingTrackingUrl: String?
-    public var fulfillmentType: String?
+    public var fulfillmentType: ItemFulfillmentType?
 
     public init(
-        name: String? = nil, category: String? = nil, quantity: Int? = nil,
+        name: String? = nil,
+        category: String? = nil,
+        quantity: Int? = nil,
         unitPrice: CurrencyValue? = nil,
-        unitTax: CurrencyValue? = nil, sku: String? = nil,
-        itemUrl: String? = nil, imageUrl: String? = nil,
-        description: String? = nil, shippingCost: CurrencyValue? = nil,
+        unitTax: CurrencyValue? = nil,
+        sku: String? = nil,
+        itemUrl: String? = nil,
+        imageUrl: String? = nil,
+        description: String? = nil,
+        shippingCost: CurrencyValue? = nil,
         shippingProvider: String? = nil,
         shippingDescription: String? = nil,
         shippingTrackingNumber: String? = nil,
-        shippingTrackingUrl: String? = nil, fulfillmentType: String? = nil
+        shippingTrackingUrl: String? = nil,
+        fulfillmentType: ItemFulfillmentType? = nil
     ) {
         self.name = name
         self.category = category
@@ -258,7 +264,22 @@ public class Item {
     }
 }
 
-/// Categories that are ineligible for BNPL financing
-private let ineligibleItemCategories: Set<String> = [
+
+public let ineligibleItemCategories: Set<String> = [
     "non-leasable", "nonleasable"
 ]
+
+/// Enum representing different fulfillment types for orders.
+public enum OrderFulfillmentType: String {
+    case pickup = "PICKUP"
+    case delivery = "DELIVERY"
+    case multiple = "MULTIPLE"
+    case unknown = "UNKNOWN"
+}
+
+/// Enum representing different fulfillment types for items.
+public enum ItemFulfillmentType: String {
+    case pickup = "PICKUP"
+    case delivery = "DELIVERY"
+    case unknown = "UNKNOWN"
+}

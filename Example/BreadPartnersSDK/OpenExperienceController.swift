@@ -9,8 +9,8 @@ class OpenExperienceController: UIViewController {
     }
 
     func openExperienceFlow() {
-        let placementRequestType: [String: Any] = TestData.shared.placementConfigurations["ECO"]!
-//        let placementRequestType: [String: Any] = [:]
+//        let placementRequestType: [String: Any] = TestData.shared.placementConfigurations["ECO"]!
+        let placementRequestType: [String: Any] = [:]
         let placementID = placementRequestType["placementID"] as? String
         let price = (placementRequestType["price"] as? Int)
         let loyaltyId = (placementRequestType["loyaltyId"] as? String)
@@ -25,7 +25,7 @@ class OpenExperienceController: UIViewController {
         let givenName = "John"
         let familyName = "Doe"
         let additionalName = "Smith"
-        let email = "joncarlos.tavarez.1163@gmail.com"
+        let email = "John.Doe.1163@gmail.com"
         let phone = "3474351163"
         let postalCode = "11222"
         let region = "NY"
@@ -68,7 +68,7 @@ class OpenExperienceController: UIViewController {
                     ),
                     email: email
                 ),
-                fulfillmentType: "PICKUP",
+                fulfillmentType: .pickup,
                 items: [
                     Item(
                         name: "Product 1",
@@ -78,7 +78,7 @@ class OpenExperienceController: UIViewController {
                         unitTax: CurrencyValue(currency: "USD", value: 7499),
                         sku: "SKU-001",
                         shippingCost: CurrencyValue(currency: "USD", value: 0),
-                        fulfillmentType: "PICKUP"
+                        fulfillmentType: .pickup,
                     ),
                     Item(
                         name: "Product 2",
@@ -88,7 +88,7 @@ class OpenExperienceController: UIViewController {
                         unitTax: CurrencyValue(currency: "USD", value: 7500),
                         sku: "SKU-002",
                         shippingCost: CurrencyValue(currency: "USD", value: 0),
-                        fulfillmentType: "PICKUP"
+                        fulfillmentType: .pickup,
                     )
                 ]))
 

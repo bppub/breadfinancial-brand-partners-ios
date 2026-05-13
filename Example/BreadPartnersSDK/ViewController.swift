@@ -102,7 +102,7 @@ class ViewController: UIViewController {
                         region: "US-NY",
                         country: "US"),
                     email: "john.doe@gmail.com"),
-                fulfillmentType: "type",
+                fulfillmentType: OrderFulfillmentType.pickup,
                 items: []))
 
         
@@ -389,7 +389,7 @@ class ViewController: UIViewController {
                         region: "US-NY",
                         country: "US"),
                     email: "john.doe@gmail.com"),
-                fulfillmentType: "type",
+                fulfillmentType: OrderFulfillmentType.pickup,
                 items: []))
 
         let placementsConfiguration = PlacementConfiguration(

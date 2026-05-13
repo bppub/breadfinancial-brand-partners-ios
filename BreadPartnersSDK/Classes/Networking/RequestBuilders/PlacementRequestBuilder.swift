@@ -207,7 +207,7 @@ class PlacementRequestBuilder {
             "totalPriceValue": fromMoneyToDollars(order.totalPrice?.value),
             "totalShippingValue": fromMoneyToDollars(order.totalShipping?.value),
             "totalTaxValue": fromMoneyToDollars(order.totalTax?.value),
-            "fulfillmentType": order.fulfillmentType
+            "fulfillmentType": order.fulfillmentType?.rawValue
         ]
         
         orderData.assignDefined(
@@ -245,7 +245,7 @@ class PlacementRequestBuilder {
                 "unitTaxValue": fromMoneyToDollars(item.unitTax?.value),
                 "sku": item.sku,
                 "shippingCostValue": fromMoneyToDollars(item.shippingCost?.value),
-                "fulfillmentType": item.fulfillmentType
+                "fulfillmentType": item.fulfillmentType?.rawValue
             ]
         )
     }
