@@ -86,7 +86,7 @@ class ViewController: UIViewController {
                 subTotal: CurrencyValue(currency: "USD", value: 0),
                 totalDiscounts: CurrencyValue(currency: "USD", value: 0),
                 totalPrice: CurrencyValue(
-                    currency: "USD", value: Int64(price ?? 0)),
+                    currency: "USD", value: Int(price ?? 0)),
                 totalShipping: CurrencyValue(currency: "USD", value: 0),
                 totalTax: CurrencyValue(currency: "USD", value: 0),
                 discountCode: "string",
@@ -373,7 +373,7 @@ class ViewController: UIViewController {
                 subTotal: CurrencyValue(currency: "USD", value: 0),
                 totalDiscounts: CurrencyValue(currency: "USD", value: 0),
                 totalPrice: CurrencyValue(
-                    currency: "USD", value: Int64(price ?? 0)),
+                    currency: "USD", value: Int(price ?? 0)),
                 totalShipping: CurrencyValue(currency: "USD", value: 0),
                 totalTax: CurrencyValue(currency: "USD", value: 0),
                 discountCode: "string",

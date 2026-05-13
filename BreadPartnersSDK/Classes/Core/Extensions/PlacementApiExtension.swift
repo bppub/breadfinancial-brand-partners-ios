@@ -42,11 +42,12 @@ extension BreadPartnersSDK {
             let apiUrl = APIUrl(urlType: .generatePlacements).url
             var request: Any? = nil
 
-            let builder = await PlacementRequestBuilder(
+            let builder = PlacementRequestBuilder(
                 integrationKey: integrationKey,
                 merchantConfiguration: merchantConfiguration,
                 placementConfig: placementsConfiguration.placementData,
                 environment: APIUrl.currentEnvironment)
+            
             request = builder.build()
 
             let response = try await APIClient(logger: logger).request(

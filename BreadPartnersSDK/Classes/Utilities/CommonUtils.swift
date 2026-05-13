@@ -224,33 +224,4 @@ actor CommonUtils: NSObject {
 
         return "\(deviceModel): \(systemName) \(systemVersion)" // iPhone; iOS 18.2
     }
-    
-    /// Merges source maps into target map, only including defined and non-empty values.
-    /// Supports multiple source maps passed as variadic arguments.
-    /// Returns the same type as the target parameter.
-    ///
-    /// - Parameters:
-    ///   - target: The target dictionary to merge into
-    ///   - sources: One or more source dictionaries to merge from
-    /// - Returns: The target dictionary with merged values (same type as input)
-    func assignDefined(
-        target: inout [String: Any?],
-        _ sources: [String: Any?]...
-    ) -> [String: Any?] {
-        for source in sources {
-            if source.isEmpty { continue }
-            
-            for (key, value) in source {
-                // Only add if value is not nil and not an empty string
-                if let stringValue = value as? String {
-                    if !stringValue.isEmpty {
-                        target[key] = value
-                    }
-                } else if value != nil {
-                    target[key] = value
-                }
-            }
-        }
-        return target
-    }
 }

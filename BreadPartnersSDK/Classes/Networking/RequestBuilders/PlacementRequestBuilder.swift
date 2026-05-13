@@ -25,9 +25,9 @@ class PlacementRequestBuilder {
         merchantConfiguration: MerchantConfiguration?,
         placementConfig: PlacementData?,
         environment: BreadPartnersEnvironment?
-    ) async {
+    ) {
         self.brandId = integrationKey
-        await self.createPlacementRequestBody(
+        self.createPlacementRequestBody(
             merchantConfiguration: merchantConfiguration,
             placementData: placementConfig)
     }
@@ -35,7 +35,7 @@ class PlacementRequestBuilder {
     private func createPlacementRequestBody(
         merchantConfiguration: MerchantConfiguration?,
         placementData: PlacementData?
-    ) async {
+    ) {
         var context = ContextRequestBody(
             ENV: APIUrl.currentEnvironment.rawValue,
             LOCATION: placementData?.locationType?.rawValue,
@@ -61,18 +61,27 @@ class PlacementRequestBuilder {
         )
         
         if(placementData?.allowCheckout == true){
-            var upqCheckoutData = mapUnifiedPlacementContextToUpqCheckout()
+            var upqCheckoutData = mapUnifiedPlacementContextToUpqCheckout(
+                placementData: placementData,
+                merchantConfiguration: merchantConfiguration,
+                
+            )
             
-            var upqPathData = pathForUnifiedPrequalCheckout()
+            let upqPathData = pathForUnifiedPrequalCheckout(
+                initialData: upqCheckoutData,
+                clientKey: integrationKey
+            ).queryString
             
-           
+            context = context.copy(
+                upqCheckoutParams: upqPathData
+            )
         } else {
-            let upqData = await  mapUnifiedPlacementContextToUPQCommonData(
+            let upqData = mapUnifiedPlacementContextToUPQCommonData(
                 placementData: placementData,
                 merchantConfiguration: merchantConfiguration
             )
             
-            var upqPathData = pathForUnifiedPrequal(
+            let upqPathData = pathForUnifiedPrequal(
                 initialData: upqData,
                 clientKey: integrationKey
             ).queryString
@@ -97,9 +106,220 @@ class PlacementRequestBuilder {
         )
     }
     
-    func mapUnifiedPlacementContextToUpqCheckout() {}
+    /// Maps placement and merchant data to UPQ checkout data.
+    /// Combines buyer info, order details, and shipping address for checkout processing.
+    ///
+    /// - Parameters:
+    ///   - placementData: Placement configuration with order information
+    ///   - merchantConfiguration: Merchant and buyer configuration
+    ///   - sessionTrackingId: Session tracking identifier
+    ///   - userTrackingId: User tracking identifier
+    ///   - financingLocationId: Financing location identifier
+    ///   - callCenter: Call center identifier
+    /// - Returns: Dictionary with all checkout data
+    private func mapUnifiedPlacementContextToUpqCheckout(
+        placementData: PlacementData? = nil,
+        merchantConfiguration: MerchantConfiguration? = nil,
+        sessionTrackingId: String? = nil,
+        userTrackingId: String? = nil,
+        financingLocationId: String? = nil,
+        callCenter: String? = nil
+    ) -> [String: Any?] {
+        // Map common data from placement and merchant configs
+        var commonData = mapUnifiedPlacementContextToUPQCommonData(
+            placementData: placementData,
+            merchantConfiguration: merchantConfiguration,
+            sessionId: sessionTrackingId,
+            userTrackingId: userTrackingId
+        )
+        
+        // Map order and check BNPL eligibility
+        let newOrder = mapUnifiedPlacementOrderToOrder(placementData?.order)
+        checkBnplEligibility(newOrder)
+        
+        // Map shipping address
+        let shippingAddress = mapUnifiedPlacementContextToUPQAddressRequest(
+            buyer: merchantConfiguration?.buyer
+        )
+        
+        return commonData.assignDefined(
+            [
+                "order": newOrder,
+                "shippingAddress": shippingAddress,
+                "prequalCreditLimit": placementData?.prequalCreditLimit,
+                "prequalificationId": placementData?.prequalificationId,
+                "financingBuyerId": placementData?.financingBuyerId,
+                "financingLocationId": financingLocationId,
+                "callCenter": callCenter,
+                "inSessionToken": placementData?.upqInSessionToken
+            ]
+        )
+    }
     
-    func pathForUnifiedPrequalCheckout() {}
+    private func checkBnplEligibility(_ order: [String: Any?]) {}
+    
+    /// Maps buyer shipping address to UPQ address.
+    ///
+    /// - Parameter buyer: Buyer object containing shipping address
+    /// - Returns: UPQAddressRequest with mapped fields, or nil if address is not available
+    private func mapUnifiedPlacementContextToUPQAddressRequest(
+        buyer: BreadPartnersBuyer?
+    ) -> UPQAddressRequest? {
+        guard let shippingAddress = buyer?.shippingAddress else { return nil }
+        
+        return UPQAddressRequest(
+            address1: shippingAddress.address1,
+            address2: shippingAddress.address2,
+            city: shippingAddress.locality,
+            state: shippingAddress.region,
+            zip: shippingAddress.postalCode
+        )
+    }
+
+    
+    /// Maps unified placement order to order.
+    ///
+    /// - Parameter order: Order object from placement config
+    /// - Returns: Dictionary with mapped fields, or empty dictionary if order is nil
+    private func mapUnifiedPlacementOrderToOrder(_ order: Order?) -> [String: Any?] {
+        guard let order = order else { return [:] }
+        
+        var orderData: [String: Any?] = [:]
+        
+        // Map basic order fields
+        let basicOrderData: [String: Any?] = [
+            "bnplEligible": order.bnplEligible,
+            "subTotalValue": fromMoneyToDollars(order.subTotal?.value),
+            "totalDiscountsValue": fromMoneyToDollars(order.totalDiscounts?.value),
+            "totalPriceValue": fromMoneyToDollars(order.totalPrice?.value),
+            "totalShippingValue": fromMoneyToDollars(order.totalShipping?.value),
+            "totalTaxValue": fromMoneyToDollars(order.totalTax?.value),
+            "fulfillmentType": order.fulfillmentType
+        ]
+        
+        orderData.assignDefined(
+            basicOrderData
+        )
+       
+        
+        
+         // Map items
+         if let items = order.items {
+             let mappedItems = items.compactMap { mapOrderItem($0) }
+             if !mappedItems.isEmpty {
+                 orderData["items"] = mappedItems
+             }
+         }
+     
+        // Map pickup information
+        if let pickupInfo = order.pickupInformation {
+            orderData["pickupInformation"] = mapPickupInformation(pickupInfo)
+        }
+        
+        return orderData
+    }
+    
+    /// Maps a single order item to a dictionary
+    /// - Parameter item: The order item to map
+    /// - Returns: Dictionary with mapped item fields
+    private func mapOrderItem(_ item: Item) -> [String: Any?] {
+        var itemData: [String: Any?] = [:]
+        
+        return itemData.assignDefined(
+            [
+                "name": item.name,
+                "category": item.category,
+                "quantity": item.quantity,
+                "unitPriceValue": fromMoneyToDollars(item.unitPrice?.value),
+                "unitTaxValue": fromMoneyToDollars(item.unitTax?.value),
+                "sku": item.sku,
+                "shippingCostValue": fromMoneyToDollars(item.shippingCost?.value),
+                "fulfillmentType": item.fulfillmentType
+            ]
+        )
+    }
+    
+    /// Maps pickup information from order
+    /// - Parameter pickupInfo: The pickup information to map
+    /// - Returns: Dictionary with mapped pickup information
+    private func mapPickupInformation(_ pickupInfo: PickupInformation) -> [String: Any?] {
+        var pickupData: [String: Any?] = [:]
+        
+        // Map name
+        if let name = pickupInfo.name {
+            var nameData: [String: Any?] = [:]
+            nameData.assignDefined(
+                [
+                    "firstName": name.givenName,
+                    "lastName": name.familyName,
+                    "additionalName": name.additionalName
+                ]
+            )
+            pickupData["name"] = nameData
+        }
+        
+        // Map address
+        if let address = pickupInfo.address {
+            var addressData: [String: Any?] = [:]
+            addressData.assignDefined(
+                [
+                    "address1": address.address1,
+                    "address2": address.address2,
+                    "city": address.locality,
+                    "state": address.region,
+                    "zip": address.postalCode
+                ]
+            )
+            pickupData["address"] = addressData
+        }
+        
+        // Map contact information
+        return pickupData.assignDefined(
+            [
+                "mobilePhone": pickupInfo.phone,
+                "emailAddress": pickupInfo.email
+            ]
+        )
+    }
+
+    /// Generates path and query string for unified prequalification checkout.
+    /// Used for checkout flow with order information.
+    ///
+    /// - Parameters:
+    ///   - initialData: Initial unified prequalification checkout data
+    ///   - clientKey: Client key for the request
+    /// - Returns: UnifiedPrequalPathResult containing path, query string, and parameters
+    private func pathForUnifiedPrequalCheckout(
+        initialData: [String: Any?],
+        clientKey: String
+    ) -> UnifiedPrequalPathResult {
+        var queryParams: [String: Any?] = [
+            "embedded": true,
+            "clientKey": clientKey
+        ]
+        
+        // Merge initial data
+        queryParams.merge(initialData) { _, new in new }
+        
+        // Create final params with stringified order and shippingAddress
+        var finalParams = queryParams
+        
+        // Stringify order object if present
+        if let order = queryParams["order"] {
+            finalParams["order"] = stringifyJSON(order)
+        }
+        
+        // Stringify shippingAddress object if present
+        if let shippingAddress = queryParams["shippingAddress"] {
+            finalParams["shippingAddress"] = stringifyJSON(shippingAddress)
+        }
+        
+        return UnifiedPrequalPathResult(
+            path: "/unified/checkout",
+            queryString: finalParams.toQueryString(),
+            queryParams: queryParams
+        )
+    }
     
     /// Generates path and query string for unified prequalification.
     /// Used for standard prequalification flow (not checkout).
@@ -141,11 +361,10 @@ class PlacementRequestBuilder {
         merchantConfiguration: MerchantConfiguration? = nil,
         sessionId: String? = nil,
         userTrackingId: String? = nil
-    ) async -> [String: Any?] {
+    ) -> [String: Any?] {
         var commonData: [String: Any?] = [:]
         
-        return await CommonUtils().assignDefined(
-            target: &commonData,
+        return commonData.assignDefined(
             [
                 "firstName": merchantConfiguration?.buyer?.givenName,
                 "lastName": merchantConfiguration?.buyer?.familyName,
@@ -179,16 +398,6 @@ class PlacementRequestBuilder {
                 "splitPayment": merchantConfiguration?.paymentMode == .split ? true : nil
             ]
         )
-        
-        return commonData
-    }
-    
-    
-    /// Converts money (cents) to dollars
-    /// - Parameter cents: Amount in cents
-    /// - Returns: Amount in dollars
-    private func fromMoneyToDollars(_ cents: Int64) -> Double {
-        return Double(cents) / 100.0
     }
 }
 
@@ -229,4 +438,87 @@ extension Dictionary where Key == String, Value == Any? {
         
         return queryItems.joined(separator: "&")
     }
+    
+    /// Merges source dictionaries into this dictionary, only including defined and non-empty values.
+    ///
+    /// - Parameter sources: One or more source dictionaries to merge from
+    /// - Returns: Self with merged values
+    @discardableResult
+    mutating func assignDefined(_ sources: [String: Any?]...) -> [String: Any?] {
+        for source in sources {
+            if source.isEmpty { continue }
+            
+            for (key, value) in source {
+                // Only add if value is not nil and not an empty string
+                if let stringValue = value as? String {
+                    if !stringValue.isEmpty {
+                        self[key] = value
+                    }
+                } else if value != nil {
+                    self[key] = value
+                }
+            }
+        }
+        return self
+    }
 }
+
+
+struct UPQAddressRequest {
+    let address1: String?
+    let address2: String?
+    let city: String?
+    let state: String?
+    let zip: String?
+    
+    public init(address1: String?,
+                address2: String?,
+                city: String?,
+                state: String?,
+                zip: String?) {
+        self.address1 = address1
+        self.address2 = address2
+        self.city = city
+        self.state = state
+        self.zip = zip
+    }
+}
+
+/// Converts Money value to dollars (divides by 100).
+///
+/// - Parameter moneyValue: Long value in cents
+/// - Returns: Double value in dollars rounded to 2 decimal places, or nil if input is nil
+private func fromMoneyToDollars(_ moneyValue: Int?) -> Double? {
+    guard let moneyValue = moneyValue else { return nil }
+    
+    let myDouble = Double(moneyValue) / 100
+    
+    let formatter = NumberFormatter()
+    formatter.minimumFractionDigits = 2
+    
+    guard let formattedString = formatter.string(from: NSNumber(value: myDouble)) else { return nil }
+
+    
+    return Double(formattedString)
+
+}
+
+/// Converts an object to JSON string
+/// - Parameter object: The object to convert
+/// - Returns: JSON string representation
+private func stringifyJSON(_ object: Any) -> String {
+    do {
+        let jsonData = try JSONSerialization.data(
+            withJSONObject: object,
+            options: [.prettyPrinted, .sortedKeys]
+        )
+        if let jsonString = String(data: jsonData, encoding: .utf8) {
+            return jsonString
+        }
+    } catch {
+        print("Error converting object to JSON: \(error.localizedDescription)")
+    }
+    return ""
+}
+
+

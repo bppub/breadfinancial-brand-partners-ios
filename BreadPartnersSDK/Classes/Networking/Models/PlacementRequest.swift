@@ -43,7 +43,7 @@ public struct ContextRequestBody: Codable {
     let PREQUAL_ID: String?
     let PREQUAL_CREDIT_LIMIT: String?
     let LOCATION: String?
-    let PRICE: Int64?
+    let PRICE: Int?
     let EXISTING_CH: Bool?
     let CARDHOLDER_TIER: String?
     let STORE_NUMBER: String?
@@ -70,7 +70,7 @@ public struct ContextRequestBody: Codable {
         PREQUAL_ID: String? = nil,
         PREQUAL_CREDIT_LIMIT: String? = nil,
         LOCATION: String? = nil,
-        PRICE: Int64? = nil,
+        PRICE: Int? = nil,
         EXISTING_CH: Bool? = nil,
         CARDHOLDER_TIER: String? = nil,
         STORE_NUMBER: String? = nil,
