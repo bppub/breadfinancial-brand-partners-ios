@@ -216,7 +216,23 @@ class PlacementRequestBuilder {
        
          // Map items
          if let items = order.items {
-             let mappedItems = items.compactMap { mapOrderItem($0) }
+             let mappedItems = items.compactMap {item in
+                 var itemData: [String: Any?] = [:]
+                 
+                 return itemData.assignDefined(
+                     [
+                         "name": item.name,
+                         "category": item.category,
+                         "quantity": item.quantity,
+                         "unitPriceValue": fromMoneyToDollars(item.unitPrice?.value),
+                         "unitTaxValue": fromMoneyToDollars(item.unitTax?.value),
+                         "sku": item.sku,
+                         "shippingCostValue": fromMoneyToDollars(item.shippingCost?.value),
+                         "fulfillmentType": item.fulfillmentType?.rawValue
+                     ]
+                 )
+                 
+             }
              if !mappedItems.isEmpty {
                  orderData["items"] = mappedItems
              }
@@ -224,74 +240,47 @@ class PlacementRequestBuilder {
      
         // Map pickup information
         if let pickupInfo = order.pickupInformation {
-            orderData["pickupInformation"] = mapPickupInformation(pickupInfo)
+                var pickupData: [String: Any?] = [:]
+                
+                // Map name
+                if let name = pickupInfo.name {
+                    var nameData: [String: Any?] = [:]
+                    nameData.assignDefined(
+                        [
+                            "firstName": name.givenName,
+                            "lastName": name.familyName,
+                            "additionalName": name.additionalName
+                        ]
+                    )
+                    pickupData["name"] = nameData
+                }
+                
+                // Map address
+                if let address = pickupInfo.address {
+                    var addressData: [String: Any?] = [:]
+                    addressData.assignDefined(
+                        [
+                            "address1": address.address1,
+                            "address2": address.address2,
+                            "city": address.locality,
+                            "state": address.region,
+                            "zip": address.postalCode
+                        ]
+                    )
+                    pickupData["address"] = addressData
+                }
+                
+                orderData["pickupInformation"] = pickupData.assignDefined(
+                    [
+                        "mobilePhone": pickupInfo.phone,
+                        "emailAddress": pickupInfo.email
+                    ]
+                )
         }
         
         return orderData
     }
-    
-    /// Maps a single order item to a dictionary
-    /// - Parameter item: The order item to map
-    /// - Returns: Dictionary with mapped item fields
-    private func mapOrderItem(_ item: Item) -> [String: Any?] {
-        var itemData: [String: Any?] = [:]
-        
-        return itemData.assignDefined(
-            [
-                "name": item.name,
-                "category": item.category,
-                "quantity": item.quantity,
-                "unitPriceValue": fromMoneyToDollars(item.unitPrice?.value),
-                "unitTaxValue": fromMoneyToDollars(item.unitTax?.value),
-                "sku": item.sku,
-                "shippingCostValue": fromMoneyToDollars(item.shippingCost?.value),
-                "fulfillmentType": item.fulfillmentType?.rawValue
-            ]
-        )
-    }
-    
-    /// Maps pickup information from order
-    /// - Parameter pickupInfo: The pickup information to map
-    /// - Returns: Dictionary with mapped pickup information
-    private func mapPickupInformation(_ pickupInfo: PickupInformation) -> [String: Any?] {
-        var pickupData: [String: Any?] = [:]
-        
-        // Map name
-        if let name = pickupInfo.name {
-            var nameData: [String: Any?] = [:]
-            nameData.assignDefined(
-                [
-                    "firstName": name.givenName,
-                    "lastName": name.familyName,
-                    "additionalName": name.additionalName
-                ]
-            )
-            pickupData["name"] = nameData
-        }
-        
-        // Map address
-        if let address = pickupInfo.address {
-            var addressData: [String: Any?] = [:]
-            addressData.assignDefined(
-                [
-                    "address1": address.address1,
-                    "address2": address.address2,
-                    "city": address.locality,
-                    "state": address.region,
-                    "zip": address.postalCode
-                ]
-            )
-            pickupData["address"] = addressData
-        }
-        
-        // Map contact information
-        return pickupData.assignDefined(
-            [
-                "mobilePhone": pickupInfo.phone,
-                "emailAddress": pickupInfo.email
-            ]
-        )
-    }
+  
 
     /// Generates path and query string for unified prequalification checkout.
     /// Used for checkout flow with order information.
