@@ -175,19 +175,20 @@ class PlacementRequestBuilder {
     /// Maps buyer shipping address to UPQ address.
     ///
     /// - Parameter buyer: Buyer object containing shipping address
-    /// - Returns: UPQAddressRequest with mapped fields, or nil if address is not available
+    /// - Returns: Dictionary with mapped address fields, or nil if address is not available
     private func mapUnifiedPlacementContextToUPQAddressRequest(
         buyer: BreadPartnersBuyer?
-    ) -> UPQAddressRequest? {
+    ) -> [String: Any?]? {
         guard let shippingAddress = buyer?.shippingAddress else { return nil }
         
-        return UPQAddressRequest(
-            address1: shippingAddress.address1,
-            address2: shippingAddress.address2,
-            city: shippingAddress.locality,
-            state: shippingAddress.region,
-            zip: shippingAddress.postalCode
-        )
+        var addressData: [String: Any?] = [:]
+        return addressData.assignDefined([
+            "address1": shippingAddress.address1,
+            "address2": shippingAddress.address2,
+            "city": shippingAddress.locality,
+            "state": shippingAddress.region,
+            "zip": shippingAddress.postalCode
+        ])
     }
 
     /// Maps unified placement order to order.
