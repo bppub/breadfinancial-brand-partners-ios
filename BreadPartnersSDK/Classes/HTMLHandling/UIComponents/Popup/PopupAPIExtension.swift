@@ -16,7 +16,7 @@ extension PopupController {
 
     /// Fetches the web view placement data asynchronously by constructing a placement request and calling the API.
     func fetchWebViewPlacement() async {
-        let builder = await PlacementRequestBuilder(
+        let builder = PlacementRequestBuilder(
             integrationKey: integrationKey,
             merchantConfiguration: merchantConfiguration,
             placementConfig: placementsConfiguration?.placementData,
