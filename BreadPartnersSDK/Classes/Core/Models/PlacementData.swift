@@ -44,7 +44,11 @@ public class PlacementData {
         allowCheckout: Bool? = nil,
         order: Order? = nil,
         defaultSelectedCardKey: String? = nil,
-        selectedCardKey: String? = nil
+        selectedCardKey: String? = nil,
+        upqInSessionToken: String? = nil,
+        financingBuyerId: String? = nil,
+        prequalificationId: String? = nil,
+        prequalCreditLimit: String? = nil,
         
     ) {
         self.financingType = financingType
@@ -55,6 +59,10 @@ public class PlacementData {
         self.order = order
         self.defaultSelectedCardKey = defaultSelectedCardKey
         self.selectedCardKey = selectedCardKey
+        self.upqInSessionToken = upqInSessionToken
+        self.financingBuyerId = financingBuyerId
+        self.prequalificationId = financingBuyerId
+        self.prequalCreditLimit = financingBuyerId
     }
 }
 
