@@ -16,7 +16,6 @@ import Foundation
 /// necessary details like pricing and settings. It uses given configurations to
 /// build and organize placement data..
 class PlacementRequestBuilder {
-    private var integrationKey: String = ""
     private var placements: [PlacementRequestBody] = []
     private var brandId: String = ""
 
@@ -36,7 +35,7 @@ class PlacementRequestBuilder {
         merchantConfiguration: MerchantConfiguration?,
         placementData: PlacementData?
     ) {
-        let context = ContextRequestBody(
+        var context = ContextRequestBody(
             ENV: APIUrl.currentEnvironment.rawValue,
             LOCATION: placementData?.locationType?.rawValue,
             PRICE: placementData?.order?.totalPrice?.value,
@@ -59,7 +58,37 @@ class PlacementRequestBuilder {
             CMP: merchantConfiguration?.campaignID.takeIfNotEmpty(),
             ALLOW_CHECKOUT: placementData?.allowCheckout ?? false
         )
-
+        
+        if(placementData?.allowCheckout == true){
+            let upqCheckoutData = mapUnifiedPlacementContextToUpqCheckout(
+                placementData: placementData,
+                merchantConfiguration: merchantConfiguration,
+                
+            )
+            
+            let upqPathData = pathForUnifiedPrequalCheckout(
+                initialData: upqCheckoutData,
+                clientKey: brandId
+            ).queryString
+            
+            context.UPQ_CHECKOUT_PARAMS = upqPathData
+     
+        } else {
+            let upqData = mapUnifiedPlacementContextToUPQCommonData(
+                placementData: placementData,
+                merchantConfiguration: merchantConfiguration
+            )
+            
+            let upqPathData = pathForUnifiedPrequal(
+                initialData: upqData,
+                clientKey: brandId
+            ).queryString
+            
+            context.UPQ_PARAMS = upqPathData
+        }
+            
+            
+            
         let placement = PlacementRequestBody(
             id: placementData?.placementId,
             context: context
@@ -74,4 +103,302 @@ class PlacementRequestBuilder {
             brandId: brandId
         )
     }
+    
+    /// Maps placement and merchant data to UPQ checkout data.
+    /// Combines buyer info, order details, and shipping address for checkout processing.
+    ///
+    /// - Parameters:
+    ///   - placementData: Placement configuration with order information
+    ///   - merchantConfiguration: Merchant and buyer configuration
+    ///   - sessionTrackingId: Session tracking identifier
+    ///   - userTrackingId: User tracking identifier
+    ///   - financingLocationId: Financing location identifier
+    ///   - callCenter: Call center identifier
+    /// - Returns: Dictionary with all checkout data
+    private func mapUnifiedPlacementContextToUpqCheckout(
+        placementData: PlacementData? = nil,
+        merchantConfiguration: MerchantConfiguration? = nil,
+        sessionTrackingId: String? = nil,
+        userTrackingId: String? = nil,
+        financingLocationId: String? = nil,
+        callCenter: String? = nil
+    ) -> [String: Any?] {
+        // Map common data from placement and merchant configs
+        var commonData = mapUnifiedPlacementContextToUPQCommonData(
+            placementData: placementData,
+            merchantConfiguration: merchantConfiguration,
+            sessionId: sessionTrackingId,
+            userTrackingId: userTrackingId
+        )
+        
+        // Map order and check BNPL eligibility
+        var newOrder = mapUnifiedPlacementOrderToOrder(placementData?.order)
+        checkBnplEligibility(&newOrder)
+        
+        // Map shipping address
+        let shippingAddress = mapUnifiedPlacementContextToUPQAddressRequest(
+            buyer: merchantConfiguration?.buyer
+        )
+        
+        return commonData.assignDefined(
+            [
+                "order": newOrder,
+                "shippingAddress": shippingAddress,
+                "prequalCreditLimit": placementData?.prequalCreditLimit,
+                "prequalificationId": placementData?.prequalificationId,
+                "financingBuyerId": placementData?.financingBuyerId,
+                "financingLocationId": financingLocationId,
+                "callCenter": callCenter,
+                "inSessionToken": placementData?.upqInSessionToken
+            ]
+        )
+    }
+
+    /// Checks BNPL eligibility based on item categories.
+    /// Sets bnplEligible to false if any item has an ineligible category.
+    ///
+    /// - Parameter orderMap: Dictionary representing the order object to check
+    private func checkBnplEligibility(_ orderMap: inout [String: Any?]) {
+        guard !orderMap.isEmpty else { return }
+        
+        guard let items = orderMap["items"] as? [[String: Any?]] else { return }
+        
+        for item in items {
+            if let itemCategory = (item["category"] as? String)?.lowercased(),
+               ineligibleItemCategories.contains(itemCategory) {
+                orderMap["bnplEligible"] = false
+                return
+            }
+        }
+    }
+    
+    /// Maps buyer shipping address to UPQ address.
+    ///
+    /// - Parameter buyer: Buyer object containing shipping address
+    /// - Returns: Dictionary with mapped address fields, or nil if address is not available
+    private func mapUnifiedPlacementContextToUPQAddressRequest(
+        buyer: BreadPartnersBuyer?
+    ) -> [String: Any?]? {
+        guard let shippingAddress = buyer?.shippingAddress else { return nil }
+        
+        var addressData: [String: Any?] = [:]
+        return addressData.assignDefined([
+            "address1": shippingAddress.address1,
+            "address2": shippingAddress.address2,
+            "city": shippingAddress.locality,
+            "state": shippingAddress.region,
+            "zip": shippingAddress.postalCode
+        ])
+    }
+
+    /// Maps unified placement order to order.
+    ///
+    /// - Parameter order: Order object from placement config
+    /// - Returns: Dictionary with mapped fields, or empty dictionary if order is nil
+    private func mapUnifiedPlacementOrderToOrder(_ order: Order?) -> [String: Any?] {
+        guard let order = order else { return [:] }
+        
+        var orderData: [String: Any?] = [:]
+
+        // Map basic order fields
+        let basicOrderData: [String: Any?] = [
+            "bnplEligible": order.bnplEligible,
+            "subTotalValue": fromMoneyToDollars(order.subTotal?.value),
+            "totalDiscountsValue": fromMoneyToDollars(order.totalDiscounts?.value),
+            "totalPriceValue": fromMoneyToDollars(order.totalPrice?.value),
+            "totalShippingValue": fromMoneyToDollars(order.totalShipping?.value),
+            "totalTaxValue": fromMoneyToDollars(order.totalTax?.value),
+            "fulfillmentType": order.fulfillmentType?.rawValue
+        ]
+        
+        orderData.assignDefined(
+            basicOrderData
+        )
+       
+         // Map items
+         if let items = order.items {
+             let mappedItems = items.compactMap {item in
+                 var itemData: [String: Any?] = [:]
+                 
+                 return itemData.assignDefined(
+                     [
+                         "name": item.name,
+                         "category": item.category,
+                         "quantity": item.quantity,
+                         "unitPriceValue": fromMoneyToDollars(item.unitPrice?.value),
+                         "unitTaxValue": fromMoneyToDollars(item.unitTax?.value),
+                         "sku": item.sku,
+                         "shippingCostValue": fromMoneyToDollars(item.shippingCost?.value),
+                         "fulfillmentType": item.fulfillmentType?.rawValue
+                     ]
+                 )
+                 
+             }
+             if !mappedItems.isEmpty {
+                 orderData["items"] = mappedItems
+             }
+         }
+     
+        // Map pickup information
+        if let pickupInfo = order.pickupInformation {
+                var pickupData: [String: Any?] = [:]
+                
+                // Map name
+                if let name = pickupInfo.name {
+                    var nameData: [String: Any?] = [:]
+                    nameData.assignDefined(
+                        [
+                            "firstName": name.givenName,
+                            "lastName": name.familyName,
+                            "additionalName": name.additionalName
+                        ]
+                    )
+                    pickupData["name"] = nameData
+                }
+                
+                // Map address
+                if let address = pickupInfo.address {
+                    var addressData: [String: Any?] = [:]
+                    addressData.assignDefined(
+                        [
+                            "address1": address.address1,
+                            "address2": address.address2,
+                            "city": address.locality,
+                            "state": address.region,
+                            "zip": address.postalCode
+                        ]
+                    )
+                    pickupData["address"] = addressData
+                }
+                
+                orderData["pickupInformation"] = pickupData.assignDefined(
+                    [
+                        "mobilePhone": pickupInfo.phone,
+                        "emailAddress": pickupInfo.email
+                    ]
+                )
+        }
+        
+        return orderData
+    }
+  
+
+    /// Generates path and query string for unified prequalification checkout.
+    /// Used for checkout flow with order information.
+    ///
+    /// - Parameters:
+    ///   - initialData: Initial unified prequalification checkout data
+    ///   - clientKey: Client key for the request
+    /// - Returns: UnifiedPrequalPathResult containing path, query string, and parameters
+    private func pathForUnifiedPrequalCheckout(
+        initialData: [String: Any?],
+        clientKey: String
+    ) -> UnifiedPrequalPathResult {
+        var queryParams: [String: Any?] = [
+            "embedded": true,
+            "clientKey": clientKey
+        ]
+        
+        // Merge initial data
+        queryParams.merge(initialData) { _, new in new }
+        
+        // Create final params with stringified order and shippingAddress
+        var finalParams = queryParams
+        
+        // Stringify order object if present
+        if let order = queryParams["order"] {
+            finalParams["order"] = stringifyJSON(order)
+        }
+        
+        // Stringify shippingAddress object if present
+        if let shippingAddress = queryParams["shippingAddress"] {
+            finalParams["shippingAddress"] = stringifyJSON(shippingAddress)
+        }
+        
+        return UnifiedPrequalPathResult(
+            path: "/unified/checkout",
+            queryString: finalParams.toQueryString(),
+            queryParams: queryParams
+        )
+    }
+    
+    /// Generates path and query string for unified prequalification.
+    /// Used for standard prequalification flow (not checkout).
+    ///
+    /// - Parameters:
+    ///   - initialData: Initial unified prequalification data
+    ///   - clientKey: Client key for the request
+    /// - Returns: UnifiedPrequalPathResult containing path, query string, and parameters
+    private func pathForUnifiedPrequal(
+        initialData: [String: Any?],
+        clientKey: String
+    ) -> UnifiedPrequalPathResult {
+        var queryParams: [String: Any?] = [
+            "embedded": true,
+            "clientKey": clientKey
+        ]
+        
+        // Merge initial data
+        queryParams.merge(initialData) { _, new in new }
+        
+        return UnifiedPrequalPathResult(
+            path: "/unified/offer-intro",
+            queryString: queryParams.toQueryString(),
+            queryParams: queryParams
+        )
+    }
+    
+    /// Maps unified placement context to UPQ common data.
+    /// Transforms all fields from placementData and merchantConfiguration to CommonData format.
+    ///
+    /// - Parameters:
+    ///   - placementData: Unified placement configuration (optional)
+    ///   - merchantConfiguration: Unified setup configuration (optional)
+    ///   - sessionId: Session tracking identifier (optional)
+    ///   - userTrackingId: User tracking identifier (optional)
+    /// - Returns: Dictionary with mapped fields from both configs
+    private func mapUnifiedPlacementContextToUPQCommonData(
+        placementData: PlacementData? = nil,
+        merchantConfiguration: MerchantConfiguration? = nil,
+        sessionId: String? = nil,
+        userTrackingId: String? = nil
+    ) -> [String: Any?] {
+        var commonData: [String: Any?] = [:]
+        
+        return commonData.assignDefined(
+            [
+                "firstName": merchantConfiguration?.buyer?.givenName,
+                "lastName": merchantConfiguration?.buyer?.familyName,
+                "address1": merchantConfiguration?.buyer?.billingAddress?.address1,
+                "address2": merchantConfiguration?.buyer?.billingAddress?.address2,
+                "city": merchantConfiguration?.buyer?.billingAddress?.locality,
+                "state": merchantConfiguration?.buyer?.billingAddress?.region,
+                "zip": merchantConfiguration?.buyer?.billingAddress?.postalCode,
+                "emailAddress": merchantConfiguration?.buyer?.email,
+                "mobilePhone": merchantConfiguration?.buyer?.phone,
+                "alternativePhone": merchantConfiguration?.buyer?.alternativePhone,
+                "storeNumber": merchantConfiguration?.storeNumber,
+                "loyaltyNumber": merchantConfiguration?.loyaltyID,
+                "departmentId": merchantConfiguration?.departmentId,
+                "checkoutAmount": placementData?.order?.totalPrice?.value.map { fromMoneyToDollars($0) },
+                "location": placementData?.locationType?.rawValue,
+                "epId": userTrackingId,
+                "epPlacementId": placementData?.placementId,
+                "epSessionId": sessionId,
+                "channel": merchantConfiguration?.channel,
+                "subchannel": merchantConfiguration?.subchannel,
+                "clientVariable1": merchantConfiguration?.clientVariable1,
+                "clientVariable2": merchantConfiguration?.clientVariable2,
+                "clientVariable3": merchantConfiguration?.clientVariable3,
+                "clientVariable4": merchantConfiguration?.clientVariable4,
+                "selectedCardKey": placementData?.selectedCardKey,
+                "defaultSelectedCardKey": placementData?.defaultSelectedCardKey,
+                "overrideKey": merchantConfiguration?.overrideKey,
+                "cardChoiceCode": merchantConfiguration?.cardChoiceCode,
+                "associateId": merchantConfiguration?.clerkId,
+                "splitPayment": merchantConfiguration?.paymentMode == .split ? true : nil
+            ]
+        )
+    }
 }
+

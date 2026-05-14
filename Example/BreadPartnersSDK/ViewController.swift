@@ -86,7 +86,7 @@ class ViewController: UIViewController {
                 subTotal: CurrencyValue(currency: "USD", value: 0),
                 totalDiscounts: CurrencyValue(currency: "USD", value: 0),
                 totalPrice: CurrencyValue(
-                    currency: "USD", value: Double(price ?? 0)),
+                    currency: "USD", value: Int64(price ?? 0)),
                 totalShipping: CurrencyValue(currency: "USD", value: 0),
                 totalTax: CurrencyValue(currency: "USD", value: 0),
                 discountCode: "string",
@@ -102,7 +102,7 @@ class ViewController: UIViewController {
                         region: "US-NY",
                         country: "US"),
                     email: "john.doe@gmail.com"),
-                fulfillmentType: "type",
+                fulfillmentType: OrderFulfillmentType.pickup,
                 items: []))
 
         
@@ -373,7 +373,7 @@ class ViewController: UIViewController {
                 subTotal: CurrencyValue(currency: "USD", value: 0),
                 totalDiscounts: CurrencyValue(currency: "USD", value: 0),
                 totalPrice: CurrencyValue(
-                    currency: "USD", value: Double(price ?? 0)),
+                    currency: "USD", value: Int64(price ?? 0)),
                 totalShipping: CurrencyValue(currency: "USD", value: 0),
                 totalTax: CurrencyValue(currency: "USD", value: 0),
                 discountCode: "string",
@@ -389,7 +389,7 @@ class ViewController: UIViewController {
                         region: "US-NY",
                         country: "US"),
                     email: "john.doe@gmail.com"),
-                fulfillmentType: "type",
+                fulfillmentType: OrderFulfillmentType.pickup,
                 items: []))
 
         let placementsConfiguration = PlacementConfiguration(

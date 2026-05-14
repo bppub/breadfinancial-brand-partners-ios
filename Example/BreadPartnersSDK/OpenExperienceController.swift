@@ -9,8 +9,8 @@ class OpenExperienceController: UIViewController {
     }
 
     func openExperienceFlow() {
-        let placementRequestType: [String: Any] = TestData.shared.placementConfigurations["textPlacementRequestType1"]!
-//        let placementRequestType: [String: Any] = [:]
+//        let placementRequestType: [String: Any] = TestData.shared.placementConfigurations["textPlacementRequestType1"]!
+        let placementRequestType: [String: Any] = [:]
         let placementID = placementRequestType["placementID"] as? String
         let price = (placementRequestType["price"] as? Int)
         let loyaltyId = (placementRequestType["loyaltyId"] as? String)
@@ -21,6 +21,24 @@ class OpenExperienceController: UIViewController {
         let location = placementRequestType["location"] as? BreadPartnersLocationType
         let financingType = placementRequestType["financingType"] as? BreadPartnersFinancingType
         let allowCheckout = placementRequestType["allowCheckout"] as? Bool
+        
+        let givenName = "John"
+        let familyName = "Doe"
+        let additionalName = "Smith"
+        let email = "John.Doe.1163@gmail.com"
+        let phone = "3474351163"
+        let postalCode = "11222"
+        let region = "NY"
+        let country = "US"
+        let address1 = "123 Something Street"
+        let address2 = "Apt. 2B"
+        let locality = "Brooklyn"
+        let birthDate = "1990-01-01"
+        let subTotal: Int64 = 399999
+        let totalTax: Int64 = 14999
+        let totalShipping: Int64 = 0
+        let totalDiscounts: Int64 = 0
+        let totalPrice: Int64 = (subTotal + totalTax + totalShipping) - totalDiscounts
 
         let placementData = PlacementData(
             financingType: financingType,
@@ -28,27 +46,51 @@ class OpenExperienceController: UIViewController {
             placementId: placementID,
             allowCheckout: allowCheckout,
             order: Order(
-                subTotal: CurrencyValue(currency: "USD", value: 150000),
-                totalDiscounts: CurrencyValue(currency: "USD", value: 0),
-                totalPrice: CurrencyValue(
-                    currency: "USD", value: Double(price ?? 0)),
-                totalShipping: CurrencyValue(currency: "USD", value: 0),
-                totalTax: CurrencyValue(currency: "USD", value: 0),
+                subTotal: CurrencyValue(currency: "USD", value: subTotal),
+                totalDiscounts: CurrencyValue(currency: "USD", value: totalDiscounts),
+                totalPrice: CurrencyValue(currency: "USD", value: totalPrice),
+                totalShipping: CurrencyValue(currency: "USD", value: totalShipping),
+                totalTax: CurrencyValue(currency: "USD", value: totalTax),
                 discountCode: "string",
                 pickupInformation: PickupInformation(
                     name: Name(
-                        givenName: "John",
-                        familyName: "Doe"),
-                    phone: "+14539842345",
+                        givenName: givenName,
+                        familyName: familyName
+                    ),
+                    phone: phone,
                     address: Address(
-                        address1: "156 5th Avenue",
-                        locality: "New York",
-                        postalCode: "10019",
-                        region: "US-NY",
-                        country: "US"),
-                    email: "john.doe@gmail.com"),
-                fulfillmentType: "type",
-                items: []))
+                        address1: address1,
+                        address2: address2,
+                        locality: locality,
+                        postalCode: postalCode,
+                        region: region,
+                        country: country
+                    ),
+                    email: email
+                ),
+                fulfillmentType: .pickup,
+                items: [
+                    Item(
+                        name: "Product 1",
+                        category: "Electronics",
+                        quantity: 1,
+                        unitPrice: CurrencyValue(currency: "USD", value: subTotal / 2),
+                        unitTax: CurrencyValue(currency: "USD", value: totalTax / 2),
+                        sku: "SKU-001",
+                        shippingCost: CurrencyValue(currency: "USD", value: 0),
+                        fulfillmentType: .pickup,
+                    ),
+                    Item(
+                        name: "Product 2",
+                        category: "Accessories",
+                        quantity: 1,
+                        unitPrice: CurrencyValue(currency: "USD", value: subTotal / 2),
+                        unitTax: CurrencyValue(currency: "USD", value: totalTax / 2),
+                        sku: "SKU-002",
+                        shippingCost: CurrencyValue(currency: "USD", value: 0),
+                        fulfillmentType: .pickup,
+                    )
+                ]))
 
         let placementsConfiguration = PlacementConfiguration(
             placementData: placementData
@@ -56,22 +98,23 @@ class OpenExperienceController: UIViewController {
 
         let merchantConfiguration = MerchantConfiguration(
             buyer: BreadPartnersBuyer(
-                givenName: "Jack",
-                familyName: "Seamus",
-                additionalName: "C.",
-                birthDate: "1974-08-21",
-                email: "johncseamus@gmail.com",
-                phone: "+13235323423",
+                givenName: givenName,
+                familyName: familyName,
+                additionalName: additionalName,
+                birthDate: birthDate,
+                email: email,
+                phone: phone,
                 billingAddress: BreadPartnersAddress(
-                    address1: "323 something lane",
-                    address2: "apt. B",
-                    country: "USA",
-                    locality: "NYC",
-                    region: "NY",
-                    postalCode: "11222"
+                    address1: address1,
+                    address2: address2,
+                    country: country,
+                    locality: locality,
+                    region: region,
+                    postalCode: postalCode
                 ),
                 shippingAddress: nil
-            ), loyaltyID: loyaltyId,
+            ),
+            loyaltyID: loyaltyId,
             storeNumber: "1234567",
             env: env,
             channel: channel,
@@ -79,7 +122,6 @@ class OpenExperienceController: UIViewController {
         )
 
         Task {
-
             await BreadPartnersSDK.shared.setup(
                 environment: env ?? BreadPartnersEnvironment.stage,
                 integrationKey: brandId ?? "",
@@ -101,7 +143,7 @@ class OpenExperienceController: UIViewController {
                 case .onSDKEventLog(let log):
                     print("SDK Log: \(log)")
                 default:
-                    break
+                    print("SDK event: \(event)")
                 }
 
             }

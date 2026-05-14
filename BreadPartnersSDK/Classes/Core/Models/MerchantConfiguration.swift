@@ -23,6 +23,7 @@ public struct MerchantConfiguration {
     public var cardholderTier: String?
     public var env: BreadPartnersEnvironment?
     public var cardEnv: String?
+    public var cardChoiceCode: String? = nil
 
     public var channel: String?
     public var subchannel: String?
@@ -70,7 +71,8 @@ public struct MerchantConfiguration {
         paymentMode: PaymentMode? = nil,
         providerConfig: [String: Any]? = nil,
         skipVerification: Bool? = nil,
-        custom: [String: Any]? = nil
+        custom: [String: Any]? = nil,
+        cardChoiceCode: String? = nil
     ) {
         self.buyer = buyer
         self.loyaltyID = loyaltyID
@@ -96,6 +98,7 @@ public struct MerchantConfiguration {
         self.providerConfig = providerConfig
         self.skipVerification = skipVerification
         self.custom = custom
+        self.cardChoiceCode = cardChoiceCode
     }
 }
 
