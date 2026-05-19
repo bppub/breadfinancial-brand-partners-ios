@@ -152,12 +152,16 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
             case "APPLICATION_COMPLETED":
                 callback(.screenName(name: "application-completed"))
                 callback(.popupClosed)
+                
             case "OFFER_RESPONSE":
-                if let payload = action["payload"] as? String {
-                    if(payload == "NO" || payload == "NOT_ME" ){
+                if let payload = action["payload"] as? String,
+                   let offerResponse = OfferResponse(rawValue: payload) {
+                    callback(.offerResponse(response: offerResponse))
+                    if offerResponse == .no || offerResponse == .notMe {
                         callback(.popupClosed)
                     }
-                }                
+                }
+                
             default:
                 logger.printLog("BreadPartnersSDK: WebViewMessage: \(message.body)")
             }

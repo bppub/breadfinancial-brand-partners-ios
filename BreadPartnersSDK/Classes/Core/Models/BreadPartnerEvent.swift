@@ -74,4 +74,7 @@ public enum BreadPartnerEvents {
     
     /// Logs requests, responses, errors, and successes.
     case onSDKEventLog(logs: String)
+
+    /// Fires when the WebView sends an OFFER RESPONSE. The response parameter contains the OfferResponse value corresponding to the payload received from the WebView.
+    case offerResponse(response: OfferResponse)
 }
