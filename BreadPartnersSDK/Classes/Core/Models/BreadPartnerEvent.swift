@@ -95,4 +95,7 @@ public enum BreadPartnerEvents {
     
     /// Fires when application have been submitted in different flows.
     case applicationCompleted
+
+    /// Fires when the WebView sends an OFFER RESPONSE. The response parameter contains the OfferResponse value corresponding to the payload received from the WebView.
+    case offerResponse(response: OfferResponse)
 }
