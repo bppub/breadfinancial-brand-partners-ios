@@ -73,7 +73,11 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
         _ webView: WKWebView, didFail navigation: WKNavigation!,
         withError error: Error
     ) {
-        onPageLoadCompleted?(.failure(error))
+        // Capture and nil out the handler before calling it to prevent the continuation
+        // from being resumed more than once if didFail fires multiple times.
+        let handler = onPageLoadCompleted
+        onPageLoadCompleted = nil
+        handler?(.failure(error))
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
@@ -81,7 +85,12 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
         injectAnchorInterceptorScript(view: webView)
         
         if let url = webView.url {
-            onPageLoadCompleted?(.success(url))
+            // Capture and nil out the handler before calling it to prevent the continuation
+            // from being resumed more than once. This can happen when messages like
+            // LOG_OUT_OR_RESTART trigger a new page load, causing didFinish to fire again.
+            let handler = onPageLoadCompleted
+            onPageLoadCompleted = nil
+            handler?(.success(url))
         }
     }
 
