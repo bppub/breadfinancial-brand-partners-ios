@@ -115,14 +115,14 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
         }
 
         let alert = UIAlertController(
-            title: "Leave this page?",
-            message: "You may have unsaved changes. Are you sure you want to leave?",
+            title: Constants.confirmNavigationTitle,
+            message: Constants.confirmNavigationMessage,
             preferredStyle: .alert
         )
-        alert.addAction(UIAlertAction(title: "Stay", style: .cancel) { [weak self] _ in
+        alert.addAction(UIAlertAction(title: Constants.confirmNavigationStayButton, style: .cancel) { [weak self] _ in
             self?.pendingNavigationURL = nil
         })
-        alert.addAction(UIAlertAction(title: "Leave", style: .destructive) { [weak self] _ in
+        alert.addAction(UIAlertAction(title: Constants.confirmNavigationLeaveButton, style: .destructive) { [weak self] _ in
             self?.pendingNavigationURL = nil
             webView.load(URLRequest(url: requestURL))
         })
@@ -360,6 +360,18 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
         appRestartListener?.onAppRestartClicked(url: url)
     }
 
+    /// Returns the topmost active view controller in a backwards-compatible way.
+    ///
+    /// This is needed because `WKUIDelegate` methods for JavaScript dialogs
+    /// (`alert`, `confirm`, `prompt`) and the "Leave this page?" beforeunload
+    /// dialog all require presenting a `UIAlertController` from a live view
+    /// controller. `WKWebView` itself is not a view controller, so we must
+    /// locate one at runtime.
+    ///
+    /// - On iOS 15+, `keyWindow` is available directly on `UIWindowScene`.
+    /// - On iOS 13–14, we fall back to iterating `UIApplication.shared.windows`.
+    /// - The presentation chain is walked so the alert is never presented on a
+    ///   controller that is already presenting another one.
     private func topViewController() -> UIViewController? {
         var root: UIViewController?
         if #available(iOS 15.0, *) {
