@@ -14,7 +14,7 @@
 
 /// Manages WebView interactions and events within the SDK.
 internal class BreadFinancialWebViewInterstitial: NSObject,
-    WKNavigationDelegate, WKScriptMessageHandler
+    WKNavigationDelegate, WKScriptMessageHandler, WKUIDelegate
 {
 
     init(
@@ -26,6 +26,9 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
     }
 
     var onPageLoadCompleted: ((Result<URL, Error>) -> Void)?
+    /// Stores a pending navigation URL that is waiting for the user to confirm
+    /// they want to leave the current page (simulating a beforeunload dialog).
+    var pendingNavigationURL: URL?
 
     let logger: Logger
     let callback: ((BreadPartnerEvents) -> Void)
@@ -48,6 +51,7 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
         }
 
         webView.navigationDelegate = self
+        webView.uiDelegate = self
 
         Logger().logLoadingURL(url: url)
         let request = URLRequest(url: url)
@@ -69,11 +73,71 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
         }
     }
 
+    /// Intercepts navigation actions. If a pending navigation URL is stored
+    /// (i.e. the user already confirmed leaving via the beforeunload dialog),
+    /// it is allowed through. All other navigations that change the page are
+    /// cancelled and a native confirmation dialog is shown first.
+    func webView(
+        _ webView: WKWebView,
+        decidePolicyFor navigationAction: WKNavigationAction,
+        decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
+    ) {
+        guard let requestURL = navigationAction.request.url else {
+            decisionHandler(.allow)
+            return
+        }
+
+        // Allow the initial page load and same-page fragment navigation.
+        let isLinkActivated = navigationAction.navigationType == .linkActivated
+        let isFormSubmit = navigationAction.navigationType == .formSubmitted
+
+        guard isLinkActivated || isFormSubmit else {
+            decisionHandler(.allow)
+            return
+        }
+
+        // If this URL was already confirmed by the user, allow it through.
+        if let pending = pendingNavigationURL, pending == requestURL {
+            pendingNavigationURL = nil
+            decisionHandler(.allow)
+            return
+        }
+
+        // Cancel the navigation and show a native "Leave page?" dialog.
+        decisionHandler(.cancel)
+        pendingNavigationURL = requestURL
+
+        guard let rootVC = topViewController() else {
+            // No view controller found — just proceed with navigation.
+            pendingNavigationURL = nil
+            webView.load(URLRequest(url: requestURL))
+            return
+        }
+
+        let alert = UIAlertController(
+            title: Constants.confirmNavigationTitle,
+            message: Constants.confirmNavigationMessage,
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: Constants.confirmNavigationStayButton, style: .cancel) { [weak self] _ in
+            self?.pendingNavigationURL = nil
+        })
+        alert.addAction(UIAlertAction(title: Constants.confirmNavigationLeaveButton, style: .destructive) { [weak self] _ in
+            self?.pendingNavigationURL = nil
+            webView.load(URLRequest(url: requestURL))
+        })
+        rootVC.present(alert, animated: true)
+    }
+
     func webView(
         _ webView: WKWebView, didFail navigation: WKNavigation!,
         withError error: Error
     ) {
-        onPageLoadCompleted?(.failure(error))
+        // Capture and nil out the handler before calling it to prevent the continuation
+        // from being resumed more than once if didFail fires multiple times.
+        let handler = onPageLoadCompleted
+        onPageLoadCompleted = nil
+        handler?(.failure(error))
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
@@ -81,7 +145,12 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
         injectAnchorInterceptorScript(view: webView)
         
         if let url = webView.url {
-            onPageLoadCompleted?(.success(url))
+            // Capture and nil out the handler before calling it to prevent the continuation
+            // from being resumed more than once. This can happen when messages like
+            // LOG_OUT_OR_RESTART trigger a new page load, causing didFinish to fire again.
+            let handler = onPageLoadCompleted
+            onPageLoadCompleted = nil
+            handler?(.success(url))
         }
     }
 
@@ -202,6 +271,17 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
     }
     
     func injectAnchorInterceptorScript(view: WKWebView?) {
+        // CSS to remove the default blue tap-highlight and focus outline that
+        // WebKit draws around the first focusable element after navigation.
+        let cssScript = """
+        (function() {
+            var style = document.createElement('style');
+            style.textContent = '* { -webkit-tap-highlight-color: transparent !important; outline: none !important; }';
+            document.head.appendChild(style);
+        })();
+        """
+        view?.evaluateJavaScript(cssScript, completionHandler: nil)
+
         // JavaScript code to intercept anchor tags and log them
         let script = """
         (function() {
@@ -278,6 +358,36 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
     
     func onAppRestartClicked(url: String) {
         appRestartListener?.onAppRestartClicked(url: url)
+    }
+
+    /// Returns the topmost active view controller in a backwards-compatible way.
+    ///
+    /// This is needed because `WKUIDelegate` methods for JavaScript dialogs
+    /// (`alert`, `confirm`, `prompt`) and the "Leave this page?" beforeunload
+    /// dialog all require presenting a `UIAlertController` from a live view
+    /// controller. `WKWebView` itself is not a view controller, so we must
+    /// locate one at runtime.
+    ///
+    /// - On iOS 15+, `keyWindow` is available directly on `UIWindowScene`.
+    /// - On iOS 13–14, we fall back to iterating `UIApplication.shared.windows`.
+    /// - The presentation chain is walked so the alert is never presented on a
+    ///   controller that is already presenting another one.
+    private func topViewController() -> UIViewController? {
+        var root: UIViewController?
+        if #available(iOS 15.0, *) {
+            root = UIApplication.shared.connectedScenes
+                .compactMap({ ($0 as? UIWindowScene)?.keyWindow?.rootViewController })
+                .first
+        } else {
+            root = UIApplication.shared.windows.first(where: { $0.isKeyWindow })?.rootViewController
+        }
+        // Walk up the presentation chain to get the topmost presented view controller,
+        // so the alert is not presented on a controller that is already presenting another one.
+        var top = root
+        while let presented = top?.presentedViewController {
+            top = presented
+        }
+        return top
     }
 }
 
