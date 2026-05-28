@@ -11,6 +11,7 @@
 //------------------------------------------------------------------------------
 
 @preconcurrency import WebKit
+import SafariServices
 
 /// Manages WebView interactions and events within the SDK.
 internal class BreadFinancialWebViewInterstitial: NSObject,
@@ -42,6 +43,13 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
         let config = WKWebViewConfiguration()
         config.websiteDataStore = WKWebsiteDataStore.default()
         config.userContentController = contentController
+        // Disable Apple SSO/OAuth interception which causes
+        // "SOAuthorizationCoordinator: Attempting to perform subframe navigation"
+        // warnings when the web app uses iframes for OAuth flows.
+        // The key only exists on certain iOS/WebKit versions, so guard with responds(to:).
+        if config.preferences.responds(to: NSSelectorFromString("_setExtensionBasedAuthorizationEnabled:")) {
+            config.preferences.setValue(false, forKey: "isExtensionBasedAuthorizationEnabled")
+        }
 
         let webView = WKWebView(frame: .zero, configuration: config)
         if #available(iOS 16.4, *) {
@@ -87,11 +95,13 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
             return
         }
 
+        let isMainFrame = navigationAction.targetFrame?.isMainFrame ?? false
         // Allow the initial page load and same-page fragment navigation.
         let isLinkActivated = navigationAction.navigationType == .linkActivated
         let isFormSubmit = navigationAction.navigationType == .formSubmitted
 
         guard isLinkActivated || isFormSubmit else {
+            print("🟡 [decidePolicyFor] Allowing non-link/form navigation for: \(requestURL.absoluteString)")
             decisionHandler(.allow)
             return
         }
@@ -177,10 +187,9 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
                 }
 
             case "OPEN_EXTERNAL":
-                if let url = action["payload"] as? String {
-                    if let externalURL = URL(string: url) {
-                        UIApplication.shared.open(externalURL, options: [:], completionHandler: nil)
-                    }
+                if let url = action["payload"] as? String,
+                   let externalURL = URL(string: url) {
+                    openInBrowser(url: externalURL)
                 }
             case "HEIGHT_CHANGED":
                 break
@@ -270,6 +279,121 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
 
     }
     
+    /// Called when JavaScript does `window.open(url, '_blank')` or a link with
+    /// `target="_blank"` is activated without being intercepted by our JS script.
+    ///
+    /// For `about:blank` navigations (e.g. when the web app opens a disclosure
+    /// document by writing HTML into a new window), we return a real `WKWebView`
+    /// embedded in a modal so the content is displayed in-app.
+    /// For all other URLs we fall back to `SFSafariViewController`.
+    func webView(
+        _ webView: WKWebView,
+        createWebViewWith configuration: WKWebViewConfiguration,
+        for navigationAction: WKNavigationAction,
+        windowFeatures: WKWindowFeatures
+    ) -> WKWebView? {
+        let requestURL = navigationAction.request.url
+        print("🔵 [createWebViewWith] URL: \(requestURL?.absoluteString ?? "nil") | navType: \(navigationAction.navigationType.rawValue) | isMainFrame: \(navigationAction.targetFrame?.isMainFrame ?? false) | sourceFrame isMainFrame: \(navigationAction.sourceFrame.isMainFrame)")
+
+        // about:blank is used when the page does window.open() and then writes
+        // HTML into the new window (e.g. disclosure documents).
+        // Return a hosted WKWebView so the content renders in a modal sheet.
+        if requestURL == nil || requestURL?.absoluteString == "about:blank" || (requestURL?.absoluteString ?? "").isEmpty {
+            print("🔵 [createWebViewWith] Presenting popup WKWebView for about:blank / nil URL")
+            return presentedPopupWebView(with: configuration)
+        }
+
+        // Only open valid http/https URLs externally; ignore blob:, javascript:, etc.
+        if let url = requestURL,
+           let scheme = url.scheme?.lowercased(),
+           scheme == "https" || scheme == "http" {
+            print("🔵 [createWebViewWith] Opening in browser: \(url)")
+            openInBrowser(url: url)
+        } else {
+            print("⚠️ [createWebViewWith] Ignoring unsupported scheme URL: \(requestURL?.absoluteString ?? "nil")")
+        }
+        return nil
+    }
+
+    func webView(
+        _ webView: WKWebView,
+        decidePolicyFor navigationAction: WKNavigationAction,
+        preferences: WKWebpagePreferences,
+        decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void
+    ) {
+        let url = navigationAction.request.url
+        let isMainFrame = navigationAction.targetFrame?.isMainFrame ?? false
+        print("🟡 [decidePolicyFor+prefs] URL: \(url?.absoluteString ?? "nil") | isMainFrame: \(isMainFrame) | navType: \(navigationAction.navigationType.rawValue)")
+        decisionHandler(.allow, preferences)
+    }
+
+    /// Creates a `WKWebView` using the provided configuration, embeds it in a
+    /// full-screen modal view controller, and presents it from the top view
+    /// controller.  The modal includes a "Done" / "Close" button so the user
+    /// can dismiss it.
+    ///
+    /// - Returns: The `WKWebView` instance so that WebKit can route the new
+    ///   window's content into it.
+    private func presentedPopupWebView(with configuration: WKWebViewConfiguration) -> WKWebView {
+        let popupWebView = WKWebView(frame: .zero, configuration: configuration)
+        popupWebView.navigationDelegate = self
+
+        DispatchQueue.main.async { [weak self] in
+            guard let topVC = self?.topViewController() else { return }
+
+            let containerVC = UIViewController()
+            containerVC.view.backgroundColor = .systemBackground
+            containerVC.modalPresentationStyle = .pageSheet
+
+            // Close button
+            let closeButton = UIButton(type: .system)
+            closeButton.setTitle("Close", for: .normal)
+            closeButton.translatesAutoresizingMaskIntoConstraints = false
+            closeButton.addTarget(containerVC, action: #selector(UIViewController.dismissSelf), for: .touchUpInside)
+
+            popupWebView.translatesAutoresizingMaskIntoConstraints = false
+            containerVC.view.addSubview(popupWebView)
+            containerVC.view.addSubview(closeButton)
+
+            let safeArea = containerVC.view.safeAreaLayoutGuide
+            NSLayoutConstraint.activate([
+                closeButton.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 8),
+                closeButton.trailingAnchor.constraint(equalTo: safeArea.trailingAnchor, constant: -16),
+
+                popupWebView.topAnchor.constraint(equalTo: closeButton.bottomAnchor, constant: 8),
+                popupWebView.leadingAnchor.constraint(equalTo: containerVC.view.leadingAnchor),
+                popupWebView.trailingAnchor.constraint(equalTo: containerVC.view.trailingAnchor),
+                popupWebView.bottomAnchor.constraint(equalTo: containerVC.view.bottomAnchor),
+            ])
+
+            topVC.present(containerVC, animated: true)
+        }
+
+        return popupWebView
+    }
+
+    /// Opens the given URL in SFSafariViewController (in-app browser).
+    /// Falls back to UIApplication.open for non-http(s) URLs.
+    private func openInBrowser(url: URL) {
+        let scheme = url.scheme?.lowercased() ?? ""
+        guard scheme == "https" || scheme == "http" else {
+            // Guard against invalid URLs that would cause -[_LSDOpenClient openURL:] to fail
+            // with NSOSStatusErrorDomain Code=-50 "invalid input parameters".
+            guard UIApplication.shared.canOpenURL(url) else {
+                logger.printLog("BreadPartnersSDK: Cannot open URL with scheme '\(scheme)': \(url)")
+                return
+            }
+            UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            return
+        }
+        DispatchQueue.main.async { [weak self] in
+            guard let topVC = self?.topViewController() else { return }
+            let safariVC = SFSafariViewController(url: url)
+            safariVC.modalPresentationStyle = .pageSheet
+            topVC.present(safariVC, animated: true)
+        }
+    }
+
     func injectAnchorInterceptorScript(view: WKWebView?) {
         // CSS to remove the default blue tap-highlight and focus outline that
         // WebKit draws around the first focusable element after navigation.
@@ -393,4 +517,10 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
 
 protocol AppRestartListener {
     func onAppRestartClicked(url: String)
+}
+
+private extension UIViewController {
+    @objc func dismissSelf() {
+        dismiss(animated: true)
+    }
 }
