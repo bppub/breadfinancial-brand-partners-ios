@@ -101,7 +101,6 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
         let isFormSubmit = navigationAction.navigationType == .formSubmitted
 
         guard isLinkActivated || isFormSubmit else {
-            print("🟡 [decidePolicyFor] Allowing non-link/form navigation for: \(requestURL.absoluteString)")
             decisionHandler(.allow)
             return
         }
@@ -180,16 +179,17 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
                     logger.printLog("Issue in restarting application")
                 }
             case "AnchorTags":
-                if action["payload"] as? [String] != nil {
+                if let payload = action["payload"] as? [String] {
 //                    logger.printWebAnchorLogs(data:"\(payload.joined(separator: "\n"))")
                 } else {
 //                    logger.printWebAnchorLogs(data:"Anchor Tags: No anchors found")
                 }
 
             case "OPEN_EXTERNAL":
-                if let url = action["payload"] as? String,
-                   let externalURL = URL(string: url) {
-                    openInBrowser(url: externalURL)
+                if let url = action["payload"] as? String {
+                    if let externalURL = URL(string: url) {
+                        UIApplication.shared.open(externalURL, options: [:], completionHandler: nil)
+                    }
                 }
             case "HEIGHT_CHANGED":
                 break
@@ -285,7 +285,6 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
     /// For `about:blank` navigations (e.g. when the web app opens a disclosure
     /// document by writing HTML into a new window), we return a real `WKWebView`
     /// embedded in a modal so the content is displayed in-app.
-    /// For all other URLs we fall back to `SFSafariViewController`.
     func webView(
         _ webView: WKWebView,
         createWebViewWith configuration: WKWebViewConfiguration,
@@ -293,38 +292,16 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
         windowFeatures: WKWindowFeatures
     ) -> WKWebView? {
         let requestURL = navigationAction.request.url
-        print("🔵 [createWebViewWith] URL: \(requestURL?.absoluteString ?? "nil") | navType: \(navigationAction.navigationType.rawValue) | isMainFrame: \(navigationAction.targetFrame?.isMainFrame ?? false) | sourceFrame isMainFrame: \(navigationAction.sourceFrame.isMainFrame)")
 
         // about:blank is used when the page does window.open() and then writes
         // HTML into the new window (e.g. disclosure documents).
         // Return a hosted WKWebView so the content renders in a modal sheet.
-        if requestURL == nil || requestURL?.absoluteString == "about:blank" || (requestURL?.absoluteString ?? "").isEmpty {
+        if requestURL == nil || (requestURL?.absoluteString ?? "").isEmpty {
             print("🔵 [createWebViewWith] Presenting popup WKWebView for about:blank / nil URL")
             return presentedPopupWebView(with: configuration)
         }
 
-        // Only open valid http/https URLs externally; ignore blob:, javascript:, etc.
-        if let url = requestURL,
-           let scheme = url.scheme?.lowercased(),
-           scheme == "https" || scheme == "http" {
-            print("🔵 [createWebViewWith] Opening in browser: \(url)")
-            openInBrowser(url: url)
-        } else {
-            print("⚠️ [createWebViewWith] Ignoring unsupported scheme URL: \(requestURL?.absoluteString ?? "nil")")
-        }
         return nil
-    }
-
-    func webView(
-        _ webView: WKWebView,
-        decidePolicyFor navigationAction: WKNavigationAction,
-        preferences: WKWebpagePreferences,
-        decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void
-    ) {
-        let url = navigationAction.request.url
-        let isMainFrame = navigationAction.targetFrame?.isMainFrame ?? false
-        print("🟡 [decidePolicyFor+prefs] URL: \(url?.absoluteString ?? "nil") | isMainFrame: \(isMainFrame) | navType: \(navigationAction.navigationType.rawValue)")
-        decisionHandler(.allow, preferences)
     }
 
     /// Creates a `WKWebView` using the provided configuration and returns it so
@@ -369,7 +346,6 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
                 case .success(let data):
                     self?.presentPDF(data: data)
                 case .failure(let error):
-                    print("⚠️ [DisclosurePDF] createPDF failed: \(error). Falling back to WKWebView modal.")
                     self?.presentWebViewModal(webView: webView)
                 }
             }
@@ -382,7 +358,7 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
     private func presentPDF(data: Data) {
         // Write to a temp file so QLPreviewController can read it.
         let tmpURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent("disclosure_\(UUID().uuidString).pdf")
+            .appendingPathComponent("disclosure.pdf")
         do {
             try data.write(to: tmpURL)
         } catch {
@@ -644,7 +620,6 @@ private class DisclosurePDFLoader: NSObject, WKNavigationDelegate, WKScriptMessa
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        print("⚠️ [DisclosurePDFLoader] Navigation failed: \(error)")
         webView.configuration.userContentController
             .removeScriptMessageHandler(forName: "disclosureReady")
         owner?.presentWebViewModal(webView: webView)
