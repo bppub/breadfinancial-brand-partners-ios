@@ -11,7 +11,6 @@
 //------------------------------------------------------------------------------
 
 @preconcurrency import WebKit
-import SafariServices
 import QuickLook
 
 /// Manages WebView interactions and events within the SDK.
@@ -347,6 +346,7 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
                     self?.presentPDF(data: data)
                 case .failure(let error):
                     self?.presentWebViewModal(webView: webView)
+                    self?.callback(.sdkError(error: error))
                 }
             }
         } else {
@@ -362,7 +362,7 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
         do {
             try data.write(to: tmpURL)
         } catch {
-            print("⚠️ [DisclosurePDF] Failed to write PDF to disk: \(error)")
+            callback(.sdkError(error: error))
             return
         }
 
@@ -407,28 +407,6 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
             ])
 
             topVC.present(containerVC, animated: true)
-        }
-    }
-
-    /// Opens the given URL in SFSafariViewController (in-app browser).
-    /// Falls back to UIApplication.open for non-http(s) URLs.
-    private func openInBrowser(url: URL) {
-        let scheme = url.scheme?.lowercased() ?? ""
-        guard scheme == "https" || scheme == "http" else {
-            // Guard against invalid URLs that would cause -[_LSDOpenClient openURL:] to fail
-            // with NSOSStatusErrorDomain Code=-50 "invalid input parameters".
-            guard UIApplication.shared.canOpenURL(url) else {
-                logger.printLog("BreadPartnersSDK: Cannot open URL with scheme '\(scheme)': \(url)")
-                return
-            }
-            UIApplication.shared.open(url, options: [:], completionHandler: nil)
-            return
-        }
-        DispatchQueue.main.async { [weak self] in
-            guard let topVC = self?.topViewController() else { return }
-            let safariVC = SFSafariViewController(url: url)
-            safariVC.modalPresentationStyle = .pageSheet
-            topVC.present(safariVC, animated: true)
         }
     }
 
