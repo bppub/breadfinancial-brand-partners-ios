@@ -326,7 +326,8 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
     private var isDisclosurePresenting = false
 
     /// Presents the disclosure content as a PDF using QLPreviewController.
-    /// Falls back to a plain WKWebView modal on iOS < 14.
+    /// On iOS 14+ uses WKWebView.createPDF(); on iOS 13 falls back to
+    /// UIPrintPageRenderer to generate the PDF from the webview's content.
     internal func presentDisclosureContent(from webView: WKWebView) {
         guard !isDisclosurePresenting else { return }
         isDisclosurePresenting = true
@@ -342,11 +343,18 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
                 }
             }
         } else {
-            presentWebViewModal(webView: webView)
+            // iOS 13: render the WKWebView content to PDF using UIPrintPageRenderer.
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                if let data = webView.exportAsPDF() {
+                    self.presentPDF(data: data)
+                } else {
+                    self.presentWebViewModal(webView: webView)
+                }
+            }
         }
     }
 
-    @available(iOS 14.0, *)
     private func presentPDF(data: Data) {
         // Write to a temp file so QLPreviewController can read it.
         let tmpURL = FileManager.default.temporaryDirectory
@@ -603,5 +611,37 @@ private class DisclosurePDFPreviewDataSource: NSObject, QLPreviewControllerDataS
     func numberOfPreviewItems(in controller: QLPreviewController) -> Int { 1 }
     func previewController(_ controller: QLPreviewController, previewItemAt index: Int) -> QLPreviewItem {
         url as QLPreviewItem
+    }
+}
+
+// MARK: - iOS 13 PDF export
+
+private extension WKWebView {
+    /// Renders the webview's current content to a PDF `Data` blob using
+    /// `UIPrintPageRenderer`. This is the iOS 13-compatible alternative to
+    /// `WKWebView.createPDF()` which requires iOS 14+.
+    ///
+    /// - Returns: PDF data, or `nil` if rendering failed.
+    func exportAsPDF() -> Data? {
+        let renderer = UIPrintPageRenderer()
+        renderer.addPrintFormatter(viewPrintFormatter(), startingAtPageAt: 0)
+
+        // A4 page size in points (72 pts/inch).
+        let pageSize = CGSize(width: 595.2, height: 841.8)
+        let printableRect = CGRect(origin: .zero, size: pageSize).insetBy(dx: 36, dy: 36)
+        let paperRect = CGRect(origin: .zero, size: pageSize)
+
+        renderer.setValue(NSValue(cgRect: paperRect), forKey: "paperRect")
+        renderer.setValue(NSValue(cgRect: printableRect), forKey: "printableRect")
+
+        let data = NSMutableData()
+        UIGraphicsBeginPDFContextToData(data, paperRect, nil)
+        renderer.prepare(forDrawingPages: NSRange(location: 0, length: renderer.numberOfPages))
+        for page in 0 ..< renderer.numberOfPages {
+            UIGraphicsBeginPDFPage()
+            renderer.drawPage(at: page, in: UIGraphicsGetCurrentContext()!.boundingBoxOfClipPath)
+        }
+        UIGraphicsEndPDFContext()
+        return data.length > 0 ? data as Data : nil
     }
 }
