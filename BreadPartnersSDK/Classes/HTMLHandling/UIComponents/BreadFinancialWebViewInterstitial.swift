@@ -43,13 +43,6 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
         let config = WKWebViewConfiguration()
         config.websiteDataStore = WKWebsiteDataStore.default()
         config.userContentController = contentController
-        // Disable Apple SSO/OAuth interception which causes
-        // "SOAuthorizationCoordinator: Attempting to perform subframe navigation"
-        // warnings when the web app uses iframes for OAuth flows.
-        // The key only exists on certain iOS/WebKit versions, so guard with responds(to:).
-        if config.preferences.responds(to: NSSelectorFromString("_setExtensionBasedAuthorizationEnabled:")) {
-            config.preferences.setValue(false, forKey: "isExtensionBasedAuthorizationEnabled")
-        }
 
         let webView = WKWebView(frame: .zero, configuration: config)
         if #available(iOS 16.4, *) {
@@ -278,12 +271,12 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
 
     }
     
-    /// Called when JavaScript does `window.open(url, '_blank')` or a link with
-    /// `target="_blank"` is activated without being intercepted by our JS script.
+    /// Called by WebKit when a page requests a new window (e.g. `window.open()`).
     ///
-    /// For `about:blank` navigations (e.g. when the web app opens a disclosure
-    /// document by writing HTML into a new window), we return a real `WKWebView`
-    /// embedded in a modal so the content is displayed in-app.
+    /// When the requested URL is `nil` or empty (typical for `about:blank` popups
+    /// where the web app writes disclosure HTML into a new window via `document.write()`),
+    /// we return a real `WKWebView` so the content can be captured and displayed as a PDF.
+    /// All other new-window requests are ignored by returning `nil`.
     func webView(
         _ webView: WKWebView,
         createWebViewWith configuration: WKWebViewConfiguration,
@@ -296,7 +289,6 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
         // HTML into the new window (e.g. disclosure documents).
         // Return a hosted WKWebView so the content renders in a modal sheet.
         if requestURL == nil || (requestURL?.absoluteString ?? "").isEmpty {
-            print("🔵 [createWebViewWith] Presenting popup WKWebView for about:blank / nil URL")
             return presentedPopupWebView(with: configuration)
         }
 
