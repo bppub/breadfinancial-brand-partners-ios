@@ -34,6 +34,9 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
     let logger: Logger
     let callback: ((BreadPartnerEvents) -> Void)
     var appRestartListener: AppRestartListener?
+    /// Set to `true` when a LOG_OUT_OR_RESTART message is received from the web app,
+    /// so the navigation confirmation dialog is shown only for that specific flow.
+    var pendingLogOutOrRestart = false
     
     func createWebView(with url: URL) -> WKWebView {
 
@@ -74,10 +77,9 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
         }
     }
 
-    /// Intercepts navigation actions. If a pending navigation URL is stored
-    /// (i.e. the user already confirmed leaving via the beforeunload dialog),
-    /// it is allowed through. All other navigations that change the page are
-    /// cancelled and a native confirmation dialog is shown first.
+    /// Intercepts navigation actions. Shows a native "Leave page?" confirmation
+    /// dialog only when a LOG_OUT_OR_RESTART message was previously received from
+    /// the web app. All other navigations are allowed through immediately.
     func webView(
         _ webView: WKWebView,
         decidePolicyFor navigationAction: WKNavigationAction,
@@ -88,11 +90,11 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
             return
         }
 
-        // Allow the initial page load and same-page fragment navigation.
         let isLinkActivated = navigationAction.navigationType == .linkActivated
         let isFormSubmit = navigationAction.navigationType == .formSubmitted
 
-        guard isLinkActivated || isFormSubmit else {
+        // Only intercept link/form navigations that follow a LOG_OUT_OR_RESTART message.
+        guard (isLinkActivated || isFormSubmit) && pendingLogOutOrRestart else {
             decisionHandler(.allow)
             return
         }
@@ -111,6 +113,7 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
         guard let rootVC = topViewController() else {
             // No view controller found — just proceed with navigation.
             pendingNavigationURL = nil
+            pendingLogOutOrRestart = false
             webView.load(URLRequest(url: requestURL))
             return
         }
@@ -122,9 +125,11 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
         )
         alert.addAction(UIAlertAction(title: Constants.confirmNavigationStayButton, style: .cancel) { [weak self] _ in
             self?.pendingNavigationURL = nil
+            self?.pendingLogOutOrRestart = false
         })
         alert.addAction(UIAlertAction(title: Constants.confirmNavigationLeaveButton, style: .destructive) { [weak self] _ in
             self?.pendingNavigationURL = nil
+            self?.pendingLogOutOrRestart = false
             webView.load(URLRequest(url: requestURL))
         })
         rootVC.present(alert, animated: true)
@@ -164,6 +169,10 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
            let type = action["type"] as? String {
             
             switch type {
+            case "LOG_OUT_OR_RESTART":
+                // Signal that the next link/form navigation should show a confirmation dialog.
+                pendingLogOutOrRestart = true
+
             case "APP_RESTART":
                 if let payload = action["payload"] as? String {
                     onAppRestartClicked(url: "\(payload)")
@@ -323,6 +332,10 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
     private static var popupWebViewKey: UInt8 = 0
     private static var loaderKey: UInt8 = 0
     private static var dataSourceKey: UInt8 = 0
+    /// Re-entrancy guard for `presentDisclosureContent(from:)`.
+    /// Since PDF generation is asynchronous, this flag prevents the method from
+    /// being triggered a second time (e.g. by a duplicate `disclosureReady` message)
+    /// before the first `QLPreviewController` has finished presenting.
     private var isDisclosurePresenting = false
 
     /// Presents the disclosure content as a PDF using QLPreviewController.
