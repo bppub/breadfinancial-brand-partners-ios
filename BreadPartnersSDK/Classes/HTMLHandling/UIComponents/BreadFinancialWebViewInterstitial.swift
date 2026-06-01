@@ -298,26 +298,26 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
         // HTML into the new window (e.g. disclosure documents).
         // Return a hosted WKWebView so the content renders in a modal sheet.
         if requestURL == nil || (requestURL?.absoluteString ?? "").isEmpty {
-            return presentedPopupWebView(with: configuration)
+            return makeDisclosureCaptureWebView(with: configuration)
         }
 
         return nil
     }
 
-    /// Creates a `WKWebView` using the provided configuration and returns it so
-    /// WebKit can write the disclosure HTML into it.  Once the HTML has loaded,
-    /// the content is rendered to a PDF via `WKWebView.createPDF()` (iOS 14+)
-    /// and displayed with `QLPreviewController`.  On iOS 13 it falls back to
-    /// displaying the `WKWebView` directly in a modal sheet.
+    /// Creates an off-screen `WKWebView` using the provided configuration and returns it so
+    /// WebKit can write disclosure HTML into it (via `document.write()`).  Once the HTML
+    /// has loaded, the content is rendered to a PDF via `WKWebView.createPDF()` (iOS 14+)
+    /// and displayed with `QLPreviewController`.  On iOS 13 it falls back to displaying
+    /// the `WKWebView` directly in a modal sheet.
     ///
-    /// - Returns: The `WKWebView` instance so WebKit can route content into it.
-    private func presentedPopupWebView(with configuration: WKWebViewConfiguration) -> WKWebView {
+    /// - Returns: The off-screen `WKWebView` instance so WebKit can route content into it.
+    private func makeDisclosureCaptureWebView(with configuration: WKWebViewConfiguration) -> WKWebView {
         // Use a large off-screen frame so the PDF page size is reasonable.
         let offscreenFrame = CGRect(x: 0, y: 0, width: 800, height: 1200)
         let popupWebView = WKWebView(frame: offscreenFrame, configuration: configuration)
         popupWebView.navigationDelegate = self
 
-        // Hold a strong reference so the webView isn't deallocated before PDF is ready.
+        // Hold a strong reference so the capture webView isn't deallocated before PDF is ready.
         objc_setAssociatedObject(self, &BreadFinancialWebViewInterstitial.popupWebViewKey, popupWebView, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
 
         // didFinish fires on popupWebView too (same delegate). We capture it via
@@ -332,7 +332,7 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
     private static var popupWebViewKey: UInt8 = 0
     private static var loaderKey: UInt8 = 0
     private static var dataSourceKey: UInt8 = 0
-    /// Re-entrancy guard for `presentDisclosureContent(from:)`.
+    /// Re-entrancy guard for `presentDisclosureAsPDF(from:)`.
     /// Since PDF generation is asynchronous, this flag prevents the method from
     /// being triggered a second time (e.g. by a duplicate `disclosureReady` message)
     /// before the first `QLPreviewController` has finished presenting.
@@ -341,7 +341,7 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
     /// Presents the disclosure content as a PDF using QLPreviewController.
     /// On iOS 14+ uses WKWebView.createPDF(); on iOS 13 falls back to
     /// UIPrintPageRenderer to generate the PDF from the webview's content.
-    internal func presentDisclosureContent(from webView: WKWebView) {
+    internal func presentDisclosureAsPDF(from webView: WKWebView) {
         guard !isDisclosurePresenting else { return }
         isDisclosurePresenting = true
         if #available(iOS 14.0, *) {
@@ -607,7 +607,7 @@ private class DisclosurePDFLoader: NSObject, WKNavigationDelegate, WKScriptMessa
         guard message.name == "disclosureReady", let wv = webView else { return }
         // Remove handler to prevent duplicate calls
         userContentController.removeScriptMessageHandler(forName: "disclosureReady")
-        owner?.presentDisclosureContent(from: wv)
+        owner?.presentDisclosureAsPDF(from: wv)
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
