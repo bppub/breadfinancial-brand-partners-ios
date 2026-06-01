@@ -351,7 +351,7 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
                 case .success(let data):
                     self?.presentPDF(data: data)
                 case .failure(let error):
-                    self?.presentWebViewModal(webView: webView)
+                    self?.presentDisclosureWebView(webView)
                     self?.callback(.sdkError(error: error))
                 }
             }
@@ -362,7 +362,7 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
                 if let data = webView.exportAsPDF() {
                     self.presentPDF(data: data)
                 } else {
-                    self.presentWebViewModal(webView: webView)
+                    self.presentDisclosureWebView(webView)
                 }
             }
         }
@@ -392,7 +392,9 @@ internal class BreadFinancialWebViewInterstitial: NSObject,
         }
     }
 
-    internal func presentWebViewModal(webView: WKWebView) {
+    /// Fallback disclosure viewer: presents the raw `WKWebView` in a modal sheet.
+    /// Used when PDF generation is unavailable (iOS < 14) or when `createPDF` fails.
+    internal func presentDisclosureWebView(_ webView: WKWebView) {
         DispatchQueue.main.async { [weak self] in
             guard let topVC = self?.topViewController() else { return }
 
@@ -613,7 +615,7 @@ private class DisclosurePDFLoader: NSObject, WKNavigationDelegate, WKScriptMessa
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
         webView.configuration.userContentController
             .removeScriptMessageHandler(forName: "disclosureReady")
-        owner?.presentWebViewModal(webView: webView)
+        owner?.presentDisclosureWebView(webView)
     }
 }
 
