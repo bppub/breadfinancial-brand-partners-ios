@@ -99,7 +99,8 @@ class RTPSController: UIViewController {
                 familyName: "Jones",
                 additionalName: "C.",
                 birthDate: "1974-08-21",
-                email: "carol.jones@example.com", phone: "3474351111",
+                email: "carol.jones@example.com",
+                phone: "3474351111",
                 alternativePhone: "3474352222",
                 billingAddress: BreadPartnersAddress(
                     address1: "3075 Loyalty Cir",
