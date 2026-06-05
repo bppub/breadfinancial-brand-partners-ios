@@ -94,7 +94,10 @@ actor CommonUtils: NSObject {
             "zip": merchantConfiguration.buyer?.billingAddress?.postalCode,
             "storeNumber": merchantConfiguration.storeNumber,
             "location": rtpsData.locationType?.rawValue,
-            "channel": rtpsData.channel
+            "channel": rtpsData.channel,
+            "mobilePhone": merchantConfiguration.buyer?.phone,
+            "emailAddress": merchantConfiguration.buyer?.email,
+            "alternativePhone": merchantConfiguration.buyer?.alternativePhone,
         ]
 
         if prescreenId != nil {

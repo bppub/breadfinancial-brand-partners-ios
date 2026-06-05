@@ -47,7 +47,10 @@ class RTPSRequestBuilder: @unchecked Sendable {
                 mockResponse: rtpsData.mockResponse?.rawValue,
                 overrideConfig: RTPSRequest.OverrideConfig(
                     enhancedPresentment: true),
-                customerAcceptedOffer: rtpsData.customerAcceptedOffer
+                customerAcceptedOffer: rtpsData.customerAcceptedOffer,
+                mobilePhone: merchantConfiguration.buyer?.phone.takeIfNotEmpty(),
+                emailAddress: merchantConfiguration.buyer?.email.takeIfNotEmpty(),
+                alternativePhone: merchantConfiguration.buyer?.alternativePhone.takeIfNotEmpty()
             )
         } else {
             return RTPSRequest(
