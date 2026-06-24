@@ -49,12 +49,10 @@ extension PopupController {
         in characterRange: NSRange,
         interaction: UITextItemInteraction
     ) -> Bool {
-        if URL.absoluteString.hasPrefix("#") {
-            // Anchor link — scroll the popup content back to the top.
+        if URL.absoluteString == "#epjs-css-overlay-header" {
             scrollView?.setContentOffset(.zero, animated: true)
             return false
         }
-        // Let the system handle all other links (http/https, mailto, etc.)
         return true
     }
 }

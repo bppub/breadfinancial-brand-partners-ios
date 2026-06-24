@@ -23,6 +23,7 @@ internal struct PopupPlacementModel {
     var primaryActionButtonAttributes: PrimaryActionButtonModel?
     var dynamicBodyModel: DynamicBodyModel
     var disclosure: NSAttributedString
+    var disclosureHTML: String
     
     struct DynamicBodyModel {
         var bodyDiv: [String: DynamicBodyContent]

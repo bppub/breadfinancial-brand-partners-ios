@@ -11,6 +11,7 @@
 //------------------------------------------------------------------------------
 
 import UIKit
+import SwiftSoup
 
 internal class PopupElements: NSObject{
     
@@ -94,6 +95,7 @@ internal class PopupElements: NSObject{
     
     func createDisclosureTextView(
         withText text: NSAttributedString,
+        rawHTML: String,
         style: PopupTextStyle,
         delegate: UITextViewDelegate
     ) -> UITextView {
@@ -129,6 +131,25 @@ internal class PopupElements: NSObject{
                 mutable.addAttribute(.font, value: newFont, range: range)
             }
         }
+        // Re-parse the raw HTML with SwiftSoup to find every <a href> and its
+        // visible text, then inject the .link attribute at those ranges.
+        if let doc = try? SwiftSoup.parse(rawHTML) {
+            let anchors = (try? doc.select("a[href]").array()) ?? []
+            let fullText = mutable.string as NSString
+            for anchor in anchors {
+                guard
+                    let href = try? anchor.attr("href"), !href.isEmpty,
+                    let linkURL = URL(string: href),
+                    let linkText = try? anchor.text(), !linkText.isEmpty
+                else { continue }
+
+                // Find the first occurrence of the link text in the plain string
+                let searchRange = NSRange(location: 0, length: fullText.length)
+                let found = fullText.range(of: linkText, options: [], range: searchRange)
+                mutable.addAttribute(.link, value: linkURL, range: found)
+            }
+        }
+
         textView.attributedText = mutable
         textView.linkTextAttributes = [
             .foregroundColor: style.textColor ?? UIColor.systemBlue,

@@ -105,6 +105,8 @@ internal class HTMLContentParser {
             document.htmlFrom(".epjs-css-overlay-header")
         let disclosure =
             document.htmlFrom(".epjs-css-overlay-disclosures")
+        let disclosureHTML =
+            (try? document.select(".epjs-css-overlay-disclosures").html()) ?? ""
 
         let primaryActionButtonAttributes =
             await extractPrimaryCTAButtonAttributes(
@@ -124,7 +126,8 @@ internal class HTMLContentParser {
             bodyHeader: bodyHeader,
             primaryActionButtonAttributes: primaryActionButtonAttributes,
             dynamicBodyModel: dynamicBodyModel,
-            disclosure: disclosure
+            disclosure: disclosure,
+            disclosureHTML: disclosureHTML
         )
     }
 

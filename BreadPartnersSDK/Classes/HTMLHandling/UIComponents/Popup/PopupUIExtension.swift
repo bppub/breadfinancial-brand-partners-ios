@@ -62,6 +62,7 @@ extension PopupController {
                 style: popupStyle.subTitlePopupTextStyle)
             disclosureTextView = PopupElements.shared.createDisclosureTextView(
                 withText: popupModel.disclosure,
+                rawHTML: popupModel.disclosureHTML,
                 style: popupStyle.disclosurePopupTextStyle,
                 delegate: self)
 
