@@ -60,9 +60,10 @@ extension PopupController {
             subtitleLabel = PopupElements.shared.createLabel(
                 withText: popupModel.overlaySubtitle,
                 style: popupStyle.subTitlePopupTextStyle)
-            disclosureLabel = PopupElements.shared.createLabel(
+            disclosureTextView = PopupElements.shared.createDisclosureTextView(
                 withText: popupModel.disclosure,
-                style: popupStyle.disclosurePopupTextStyle, align: .left)
+                style: popupStyle.disclosurePopupTextStyle,
+                delegate: self)
 
             dynamicParentProductView = PopupElements.shared.createContainerView(
                 backgroundColor: .white, borderColor: popupStyle.borderColor,
@@ -184,7 +185,7 @@ extension PopupController {
             overlayProductView.addSubview(titleLabel)
             overlayProductView.addSubview(subtitleLabel)
             overlayProductView.addSubview(dynamicParentProductView)
-            overlayProductView.addSubview(disclosureLabel)
+            overlayProductView.addSubview(disclosureTextView)
 
             dynamicParentProductView.addSubview(headerView)
             dynamicParentProductView.addSubview(dynamicChildProductView)
@@ -311,13 +312,13 @@ extension PopupController {
                     equalTo: dynamicParentProductView.trailingAnchor,
                     constant: -paddingHorizontalTen),
 
-                disclosureLabel.topAnchor.constraint(
+                disclosureTextView.topAnchor.constraint(
                     equalTo: dynamicParentProductView.bottomAnchor,
                     constant: paddingVerticalFive),
             ])
         } else {
             NSLayoutConstraint.activate([
-                disclosureLabel.topAnchor.constraint(
+                disclosureTextView.topAnchor.constraint(
                     equalTo: subtitleLabel.bottomAnchor,
                     constant: paddingVerticalFive)
             ])
@@ -362,13 +363,13 @@ extension PopupController {
                 equalTo: overlayProductView.trailingAnchor,
                 constant: -paddingHorizontalTwenty),
 
-            disclosureLabel.trailingAnchor.constraint(
+            disclosureTextView.trailingAnchor.constraint(
                 equalTo: popupView.trailingAnchor,
                 constant: -paddingHorizontalTwenty),
-            disclosureLabel.leadingAnchor.constraint(
+            disclosureTextView.leadingAnchor.constraint(
                 equalTo: overlayProductView.leadingAnchor,
                 constant: paddingHorizontalTwenty),
-            disclosureLabel.bottomAnchor.constraint(
+            disclosureTextView.bottomAnchor.constraint(
                 equalTo: overlayProductView.bottomAnchor,
                 constant: -paddingVerticalTen),
 
