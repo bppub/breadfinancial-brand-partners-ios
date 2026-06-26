@@ -57,7 +57,7 @@ public class BreadPartnerDefaults: NSObject {
         titlePopupTextStyle: TITLE_POPUP_TEXT_STYLE,
         subTitlePopupTextStyle: SUBTITLE_POPUP_TEXT_STYLE,
         headerPopupTextStyle: HEADER_POPUP_TEXT_STYLE,
-        headerBgColor: UIColor(hex: "#ececec"),
+        headerBgColor: LIGHT_GRAY_COLOR,
         headingThreePopupTextStyle: HEADING_THREE_POPUP_TEXT_STYLE,
         paragraphPopupTextStyle: PARAGRAPH_POPUP_TEXT_STYLE,
         connectorPopupTextStyle: CONNECTOR_POPUP_TEXT_STYLE,
