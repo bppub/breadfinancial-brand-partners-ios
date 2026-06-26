@@ -111,9 +111,8 @@ internal class PopupElements: NSObject{
         // Apply attributed text, preserving any link attributes from HTML
         let mutable = NSMutableAttributedString(attributedString: text)
         let fullRange = NSRange(location: 0, length: mutable.length)
-        if let textColor = style.textColor {
-            mutable.addAttribute(.foregroundColor, value: textColor, range: fullRange)
-        }
+        mutable.addAttribute(.foregroundColor, value: style.textColor, range: fullRange)
+    
         if let font = style.font {
             mutable.enumerateAttribute(.font, in: fullRange, options: []) { value, range, _ in
                 let newFont: UIFont
