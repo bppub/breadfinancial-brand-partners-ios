@@ -11,6 +11,7 @@
 //------------------------------------------------------------------------------
 
 import UIKit
+import SwiftSoup
 
 internal class PopupElements: NSObject{
     
@@ -92,7 +93,72 @@ internal class PopupElements: NSObject{
         return button
     }
     
-    func createLabelForTag(tag: String, value: String,popupStyle:PopUpStyling) -> UILabel? {
+    func createDisclosureTextView(
+        withText text: NSAttributedString,
+        rawHTML: String,
+        style: PopupTextStyle,
+        delegate: UITextViewDelegate
+    ) -> UITextView {
+        let textView = UITextView()
+        textView.translatesAutoresizingMaskIntoConstraints = false
+        textView.isEditable = false
+        textView.isScrollEnabled = false
+        textView.backgroundColor = .clear
+        textView.textContainerInset = .zero
+        textView.textContainer.lineFragmentPadding = 0
+        textView.delegate = delegate
+
+        // Apply attributed text, preserving any link attributes from HTML
+        let mutable = NSMutableAttributedString(attributedString: text)
+        let fullRange = NSRange(location: 0, length: mutable.length)
+        if let textColor = style.textColor {
+            mutable.addAttribute(.foregroundColor, value: textColor, range: fullRange)
+        }
+        if let font = style.font {
+            mutable.enumerateAttribute(.font, in: fullRange, options: []) { value, range, _ in
+                let newFont: UIFont
+                if let existingFont = value as? UIFont {
+                    let traits = existingFont.fontDescriptor.symbolicTraits
+                    if let descriptor = font.fontDescriptor.withFamily(font.familyName)
+                        .withSymbolicTraits(traits) {
+                        newFont = UIFont(descriptor: descriptor.withSize(font.pointSize), size: font.pointSize)
+                    } else {
+                        newFont = font
+                    }
+                } else {
+                    newFont = font
+                }
+                mutable.addAttribute(.font, value: newFont, range: range)
+            }
+        }
+        // Re-parse the raw HTML with SwiftSoup to find every <a href> and its
+        // visible text, then inject the .link attribute at those ranges.
+        if let doc = try? SwiftSoup.parse(rawHTML) {
+            let anchors = (try? doc.select("a[href]").array()) ?? []
+            let fullText = mutable.string as NSString
+            for anchor in anchors {
+                guard
+                    let href = try? anchor.attr("href"), !href.isEmpty,
+                    let linkURL = URL(string: href),
+                    let linkText = try? anchor.text(), !linkText.isEmpty
+                else { continue }
+
+                // Find the first occurrence of the link text in the plain string
+                let searchRange = NSRange(location: 0, length: fullText.length)
+                let found = fullText.range(of: linkText, options: [], range: searchRange)
+                mutable.addAttribute(.link, value: linkURL, range: found)
+            }
+        }
+
+        textView.attributedText = mutable
+        textView.linkTextAttributes = [
+            .foregroundColor: style.textColor ?? UIColor.systemBlue,
+            .underlineStyle: NSUnderlineStyle.single.rawValue
+        ]
+        return textView
+    }
+
+    func createLabelForTag(tag: String, value: String, popupStyle: PopUpStyling) -> UILabel? {
         switch tag.lowercased() {
         case "h3":
             return createLabel(withText: value.toAttributedString(),style: popupStyle.headingThreePopupTextStyle)

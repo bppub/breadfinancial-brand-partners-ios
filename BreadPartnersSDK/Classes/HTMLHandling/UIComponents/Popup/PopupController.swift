@@ -14,7 +14,7 @@ import Foundation
 import UIKit
 import WebKit
 
-internal class PopupController: UIViewController, AppRestartListener {
+internal class PopupController: UIViewController, AppRestartListener, UITextViewDelegate {
 
     var integrationKey: String
     var popupModel: PopupPlacementModel
@@ -32,7 +32,7 @@ internal class PopupController: UIViewController, AppRestartListener {
     var overlayEmbeddedView: UIView!
     var titleLabel: UILabel!
     var subtitleLabel: UILabel!
-    var disclosureLabel: UILabel!
+    var disclosureTextView: UITextView!
     var dynamicParentProductView: UIView!
     var headerLabel: UILabel!
     var headerView: UIView!
