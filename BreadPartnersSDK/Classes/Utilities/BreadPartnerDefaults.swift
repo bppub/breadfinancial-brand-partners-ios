@@ -15,6 +15,7 @@ import UIKit
 /// `BreadPartnerDefaults` class provides default configurations/styles/properties used across the BreadPartner SDK.
 public class BreadPartnerDefaults: NSObject {
     public static let GRAY_COLOR: UIColor = .init(hex: "#767676")
+    public static let LIGHT_GRAY_COLOR: UIColor = .init(hex: "#ececec")
     public static let TITLE_POPUP_TEXT_STYLE: PopupTextStyle = PopupTextStyle(
         font: UIFont(name: "Arial-BoldMT", size: 16.0),
         textColor: .black
@@ -51,8 +52,8 @@ public class BreadPartnerDefaults: NSObject {
     static let popupStyle = PopUpStyling(
         loaderColor: UIColor(hex: "#0f2233"),
         crossColor: .black,
-        dividerColor: UIColor(hex: "#ececec"),
-        borderColor: UIColor(hex: "#ececec").cgColor,
+        dividerColor: LIGHT_GRAY_COLOR,
+        borderColor: LIGHT_GRAY_COLOR.cgColor,
         titlePopupTextStyle: TITLE_POPUP_TEXT_STYLE,
         subTitlePopupTextStyle: SUBTITLE_POPUP_TEXT_STYLE,
         headerPopupTextStyle: HEADER_POPUP_TEXT_STYLE,

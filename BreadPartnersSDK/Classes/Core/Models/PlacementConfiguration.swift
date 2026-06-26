@@ -56,8 +56,8 @@ public struct PopUpStyling: @unchecked Sendable {
     public init(
         loaderColor: UIColor = .black,
         crossColor: UIColor = .black,
-        dividerColor: UIColor = .lightGray,
-        borderColor: CGColor = UIColor.black.cgColor,
+        dividerColor: UIColor = BreadPartnerDefaults.LIGHT_GRAY_COLOR,
+        borderColor: CGColor = BreadPartnerDefaults.LIGHT_GRAY_COLOR.cgColor,
         titlePopupTextStyle: PopupTextStyle = BreadPartnerDefaults.TITLE_POPUP_TEXT_STYLE,
         subTitlePopupTextStyle: PopupTextStyle = BreadPartnerDefaults.SUBTITLE_POPUP_TEXT_STYLE,
         headerPopupTextStyle: PopupTextStyle = BreadPartnerDefaults.HEADER_POPUP_TEXT_STYLE,
