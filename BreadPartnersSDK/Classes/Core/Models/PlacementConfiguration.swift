@@ -56,16 +56,16 @@ public struct PopUpStyling: @unchecked Sendable {
     public init(
         loaderColor: UIColor = .black,
         crossColor: UIColor = .black,
-        dividerColor: UIColor = .lightGray,
-        borderColor: CGColor = UIColor.black.cgColor,
-        titlePopupTextStyle: PopupTextStyle,
-        subTitlePopupTextStyle: PopupTextStyle,
-        headerPopupTextStyle: PopupTextStyle,
+        dividerColor: UIColor = BreadPartnerDefaults.LIGHT_GRAY_COLOR,
+        borderColor: CGColor = BreadPartnerDefaults.LIGHT_GRAY_COLOR.cgColor,
+        titlePopupTextStyle: PopupTextStyle = BreadPartnerDefaults.TITLE_POPUP_TEXT_STYLE,
+        subTitlePopupTextStyle: PopupTextStyle = BreadPartnerDefaults.SUBTITLE_POPUP_TEXT_STYLE,
+        headerPopupTextStyle: PopupTextStyle = BreadPartnerDefaults.HEADER_POPUP_TEXT_STYLE,
         headerBgColor: UIColor = .lightGray.withAlphaComponent(0.5),
-        headingThreePopupTextStyle: PopupTextStyle,
-        paragraphPopupTextStyle: PopupTextStyle,
-        connectorPopupTextStyle: PopupTextStyle,
-        disclosurePopupTextStyle: PopupTextStyle,
+        headingThreePopupTextStyle: PopupTextStyle = BreadPartnerDefaults.HEADING_THREE_POPUP_TEXT_STYLE,
+        paragraphPopupTextStyle: PopupTextStyle = BreadPartnerDefaults.PARAGRAPH_POPUP_TEXT_STYLE,
+        connectorPopupTextStyle: PopupTextStyle = BreadPartnerDefaults.CONNECTOR_POPUP_TEXT_STYLE,
+        disclosurePopupTextStyle: PopupTextStyle = BreadPartnerDefaults.DISCLOSURE_POPUP_TEXT_STYLE,
         actionButtonStyle: PopupActionButtonStyle? = nil
     ) {
         self.loaderColor = loaderColor
@@ -90,10 +90,11 @@ public struct PopUpStyling: @unchecked Sendable {
 /// - `textColor`: Specifies the color of the text.
 public struct PopupTextStyle: @unchecked Sendable {
     public var font: UIFont? = nil
-    public var textColor: UIColor? = nil
+    public var textColor: UIColor
 
     public init(
-        font: UIFont? = nil, textColor: UIColor? = nil
+        font: UIFont? = nil,
+        textColor: UIColor = BreadPartnerDefaults.GRAY_COLOR
     ) {
         self.font = font
         self.textColor = textColor

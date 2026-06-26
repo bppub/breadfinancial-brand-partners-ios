@@ -53,10 +53,7 @@ extension UILabel {
         if let font = style.font {
             self.font = font
         }
-
-        if let textColor = style.textColor {
-            self.textColor = textColor
-        }
+        self.textColor = style.textColor
     }
 }
 
