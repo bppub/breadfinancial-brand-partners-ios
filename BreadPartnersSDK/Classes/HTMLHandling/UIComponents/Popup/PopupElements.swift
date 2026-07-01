@@ -55,14 +55,47 @@ internal class PopupElements: NSObject{
         return containerView
     }
     
-    func createLabel(withText text: NSAttributedString,style:PopupTextStyle,align: NSTextAlignment = .center) -> UILabel {
+    func createLabel(withText text: NSAttributedString, style: PopupTextStyle, align: NSTextAlignment = .center) -> UILabel {
         let label = UILabel()
-        label.attributedText = text
-        label.applyTextStyle(style: style)
         label.textAlignment = align
         label.translatesAutoresizingMaskIntoConstraints = false
         label.adjustsFontForContentSizeCategory = true
         label.numberOfLines = 0
+
+        // Apply font while preserving bold/italic traits that the HTML parser embedded
+        // in the attributed string. Simply setting label.font after label.attributedText
+        // replaces every per-run font attribute and destroys bold/non-bold formatting.
+        if let targetFont = style.font, text.length > 0 {
+            let mutable = NSMutableAttributedString(attributedString: text)
+            let fullRange = NSRange(location: 0, length: mutable.length)
+
+            mutable.enumerateAttribute(.font, in: fullRange, options: []) { value, range, _ in
+                let newFont: UIFont
+                if let existingFont = value as? UIFont {
+                    // Carry bold/italic traits from the HTML-parsed font into the target family.
+                    let traits = existingFont.fontDescriptor.symbolicTraits
+                    if let descriptor = targetFont.fontDescriptor
+                        .withFamily(targetFont.familyName)
+                        .withSymbolicTraits(traits) {
+                        newFont = UIFont(descriptor: descriptor.withSize(targetFont.pointSize),
+                                         size: targetFont.pointSize)
+                    } else {
+                        newFont = targetFont
+                    }
+                } else {
+                    newFont = targetFont
+                }
+                mutable.addAttribute(.font, value: newFont, range: range)
+            }
+
+            mutable.addAttribute(.foregroundColor, value: style.textColor, range: fullRange)
+
+            label.attributedText = mutable
+        } else {
+            label.attributedText = text
+            label.applyTextStyle(style: style)
+        }
+
         return label
     }
     
@@ -112,7 +145,6 @@ internal class PopupElements: NSObject{
         let mutable = NSMutableAttributedString(attributedString: text)
         let fullRange = NSRange(location: 0, length: mutable.length)
         mutable.addAttribute(.foregroundColor, value: style.textColor, range: fullRange)
-    
         if let font = style.font {
             mutable.enumerateAttribute(.font, in: fullRange, options: []) { value, range, _ in
                 let newFont: UIFont
@@ -151,7 +183,7 @@ internal class PopupElements: NSObject{
 
         textView.attributedText = mutable
         textView.linkTextAttributes = [
-            .foregroundColor: style.textColor ?? UIColor.systemBlue,
+            .foregroundColor: style.textColor,
             .underlineStyle: NSUnderlineStyle.single.rawValue
         ]
         return textView
