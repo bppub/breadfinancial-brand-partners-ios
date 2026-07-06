@@ -29,7 +29,7 @@ public class BreadPartnerDefaults: NSObject {
         textColor: .black
     )
     public static let HEADING_THREE_POPUP_TEXT_STYLE: PopupTextStyle = PopupTextStyle(
-        font: UIFont(name: "Arial", size: 14.0),
+        font: UIFont(name: "Arial-BoldMT", size: 14.0),
         textColor: .black
     )
     public static let PARAGRAPH_POPUP_TEXT_STYLE: PopupTextStyle = PopupTextStyle(

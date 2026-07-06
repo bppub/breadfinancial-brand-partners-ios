@@ -55,16 +55,16 @@ internal class PopupElements: NSObject{
         return containerView
     }
     
-    func createLabel(withText text: NSAttributedString, style: PopupTextStyle, align: NSTextAlignment = .center) -> UILabel {
+    func createLabel(withText text: NSAttributedString,style:PopupTextStyle,align: NSTextAlignment = .center) -> UILabel {
         let label = UILabel()
         label.textAlignment = align
         label.translatesAutoresizingMaskIntoConstraints = false
         label.adjustsFontForContentSizeCategory = true
         label.numberOfLines = 0
 
-        // Apply font while preserving bold/italic traits that the HTML parser embedded
-        // in the attributed string. Simply setting label.font after label.attributedText
-        // replaces every per-run font attribute and destroys bold/non-bold formatting.
+        // Apply font while preserving bold/italic traits from HTML (e.g. <b> tags),
+        // but also keeping the default font's own traits (e.g. bold) as a baseline.
+        // Simply setting label.font after label.attributedText destroys per-run formatting.
         if let targetFont = style.font, text.length > 0 {
             let mutable = NSMutableAttributedString(attributedString: text)
             let fullRange = NSRange(location: 0, length: mutable.length)
@@ -72,11 +72,13 @@ internal class PopupElements: NSObject{
             mutable.enumerateAttribute(.font, in: fullRange, options: []) { value, range, _ in
                 let newFont: UIFont
                 if let existingFont = value as? UIFont {
-                    // Carry bold/italic traits from the HTML-parsed font into the target family.
-                    let traits = existingFont.fontDescriptor.symbolicTraits
+                    // Union: keep the default font's traits (e.g. bold) as the baseline,
+                    // then layer on any traits the HTML parser added (e.g. <b> tags).
+                    let combinedTraits = targetFont.fontDescriptor.symbolicTraits
+                        .union(existingFont.fontDescriptor.symbolicTraits)
                     if let descriptor = targetFont.fontDescriptor
                         .withFamily(targetFont.familyName)
-                        .withSymbolicTraits(traits) {
+                        .withSymbolicTraits(combinedTraits) {
                         newFont = UIFont(descriptor: descriptor.withSize(targetFont.pointSize),
                                          size: targetFont.pointSize)
                     } else {
@@ -89,6 +91,16 @@ internal class PopupElements: NSObject{
             }
 
             mutable.addAttribute(.foregroundColor, value: style.textColor, range: fullRange)
+
+            // The HTML parser embeds .paragraphStyle with .left/.natural alignment,
+            // which overrides label.textAlignment. Re-apply the requested alignment
+            // to every paragraph style run (preserving other properties like line spacing).
+            mutable.enumerateAttribute(.paragraphStyle, in: fullRange, options: []) { value, range, _ in
+                let ps = ((value as? NSParagraphStyle)?.mutableCopy() as? NSMutableParagraphStyle)
+                    ?? NSMutableParagraphStyle()
+                ps.alignment = align
+                mutable.addAttribute(.paragraphStyle, value: ps, range: range)
+            }
 
             label.attributedText = mutable
         } else {
@@ -145,13 +157,17 @@ internal class PopupElements: NSObject{
         let mutable = NSMutableAttributedString(attributedString: text)
         let fullRange = NSRange(location: 0, length: mutable.length)
         mutable.addAttribute(.foregroundColor, value: style.textColor, range: fullRange)
+    
         if let font = style.font {
             mutable.enumerateAttribute(.font, in: fullRange, options: []) { value, range, _ in
                 let newFont: UIFont
                 if let existingFont = value as? UIFont {
-                    let traits = existingFont.fontDescriptor.symbolicTraits
+                    // Union: keep the default font's traits (e.g. bold) as the baseline,
+                    // then layer on any traits the HTML parser added (e.g. <b> tags).
+                    let combinedTraits = font.fontDescriptor.symbolicTraits
+                        .union(existingFont.fontDescriptor.symbolicTraits)
                     if let descriptor = font.fontDescriptor.withFamily(font.familyName)
-                        .withSymbolicTraits(traits) {
+                        .withSymbolicTraits(combinedTraits) {
                         newFont = UIFont(descriptor: descriptor.withSize(font.pointSize), size: font.pointSize)
                     } else {
                         newFont = font
