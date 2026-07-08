@@ -17,7 +17,7 @@ public struct MerchantConfiguration {
     public var buyer: BreadPartnersBuyer?
     public var loyaltyID: String?
     public var campaignID: String?
-    public var storeNumber: String?
+    public var storeNumber: String
     public var departmentId: String?
     public var existingCardHolder: Bool?
     public var cardholderTier: String?
@@ -77,7 +77,7 @@ public struct MerchantConfiguration {
         self.buyer = buyer
         self.loyaltyID = loyaltyID
         self.campaignID = campaignID
-        self.storeNumber = storeNumber
+        self.storeNumber = (storeNumber?.isEmpty ?? true) ? "8883" : storeNumber!
         self.departmentId = departmentId
         self.existingCardHolder = existingCardHolder
         self.cardholderTier = cardholderTier

@@ -21,7 +21,7 @@ struct RTPSRequest: Codable {
     let city: String?
     let state: String?
     let zip: String?
-    let storeNumber: String?
+    let storeNumber: String
     let location: String?
     let channel: String?
     let subchannel: String?
@@ -67,7 +67,7 @@ struct RTPSRequest: Codable {
         self.city = city
         self.state = state
         self.zip = zip
-        self.storeNumber = storeNumber
+        self.storeNumber = storeNumber ?? "8883"
         self.location = location
         self.channel = channel
         self.subchannel = subchannel

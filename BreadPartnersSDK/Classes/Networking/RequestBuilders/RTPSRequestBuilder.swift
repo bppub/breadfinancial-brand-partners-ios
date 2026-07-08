@@ -39,7 +39,7 @@ class RTPSRequestBuilder: @unchecked Sendable {
                 city: buyer?.billingAddress?.locality.takeIfNotEmpty(),
                 state: buyer?.billingAddress?.region.takeIfNotEmpty(),
                 zip: buyer?.billingAddress?.postalCode.takeIfNotEmpty(),
-                storeNumber: merchantConfiguration.storeNumber.takeIfNotEmpty(),
+                storeNumber: merchantConfiguration.storeNumber,
                 location: rtpsData.locationType?.rawValue,
                 channel: merchantConfiguration.channel.takeIfNotEmpty(),
                 subchannel: merchantConfiguration.subchannel.takeIfNotEmpty(),

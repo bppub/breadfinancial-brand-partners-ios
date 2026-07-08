@@ -16,10 +16,12 @@ import Foundation
 public struct PlacementRequest: Codable {
     let placements: [PlacementRequestBody]?
     let brandId: String?
+    let platform: String
 
     public init(placements: [PlacementRequestBody]? = nil, brandId: String? = nil) {
         self.placements = placements
         self.brandId = brandId
+        self.platform = "ios"
     }
 }
 
