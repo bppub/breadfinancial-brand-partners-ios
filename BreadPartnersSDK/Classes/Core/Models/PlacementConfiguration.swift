@@ -43,6 +43,7 @@ public struct PopUpStyling: @unchecked Sendable {
     public let crossColor: UIColor
     public let dividerColor: UIColor
     public let borderColor: CGColor
+    public let backgroundColor: UIColor
     public let titlePopupTextStyle: PopupTextStyle
     public let subTitlePopupTextStyle: PopupTextStyle
     public let headerPopupTextStyle: PopupTextStyle
@@ -58,6 +59,7 @@ public struct PopUpStyling: @unchecked Sendable {
         crossColor: UIColor = .black,
         dividerColor: UIColor = BreadPartnerDefaults.LIGHT_GRAY_COLOR,
         borderColor: CGColor = BreadPartnerDefaults.LIGHT_GRAY_COLOR.cgColor,
+        backgroundColor: UIColor = .white,
         titlePopupTextStyle: PopupTextStyle = BreadPartnerDefaults.TITLE_POPUP_TEXT_STYLE,
         subTitlePopupTextStyle: PopupTextStyle = BreadPartnerDefaults.SUBTITLE_POPUP_TEXT_STYLE,
         headerPopupTextStyle: PopupTextStyle = BreadPartnerDefaults.HEADER_POPUP_TEXT_STYLE,
@@ -72,6 +74,7 @@ public struct PopUpStyling: @unchecked Sendable {
         self.crossColor = crossColor
         self.dividerColor = dividerColor
         self.borderColor = borderColor
+        self.backgroundColor = backgroundColor
         self.titlePopupTextStyle = titlePopupTextStyle
         self.subTitlePopupTextStyle = subTitlePopupTextStyle
         self.headerPopupTextStyle = headerPopupTextStyle
