@@ -5,7 +5,7 @@ platform :ios, '13.0'
 use_frameworks! :linkage => :static
 
 target 'BreadPartnersSDK_Example' do
-  pod 'BreadPartnersSDK', :path => '../', :testspecs => ['Tests']
+  pod 'BreadPartnersSDK', :path => '../'
 
   target 'BreadPartnersSDK_Tests' do
     inherit! :search_paths

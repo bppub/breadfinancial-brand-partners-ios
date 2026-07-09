@@ -44,10 +44,4 @@ TODO: Add long description of the pod here.
   s.dependency 'SwiftSoup', '~> 2.7.5'
   s.dependency 'RecaptchaEnterprise', '18.6.0'
   s.dependency 'RecaptchaInterop', '~> 100.0.0'
-
-  s.test_spec 'Tests' do |test_spec|
-    test_spec.source_files = 'BreadPartnersSDK/Tests/**/*.swift'
-    test_spec.dependency 'Quick', '~> 2.2.0'
-    test_spec.dependency 'Nimble', '~> 10.0.0'
-  end
 end
