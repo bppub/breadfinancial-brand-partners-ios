@@ -67,7 +67,7 @@ extension PopupController {
                 delegate: self)
 
             dynamicParentProductView = PopupElements.shared.createContainerView(
-                backgroundColor: .white, borderColor: popupStyle.borderColor,
+                backgroundColor: popupStyle.backgroundColor, borderColor: popupStyle.borderColor,
                 borderWidth: 1.0, cornerRadius: 8.0)
             dynamicParentProductView.translatesAutoresizingMaskIntoConstraints =
                 false

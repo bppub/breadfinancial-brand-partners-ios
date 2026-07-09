@@ -57,15 +57,67 @@ internal class PopupElements: NSObject{
     
     func createLabel(withText text: NSAttributedString,style:PopupTextStyle,align: NSTextAlignment = .center) -> UILabel {
         let label = UILabel()
-        label.attributedText = text
-        label.applyTextStyle(style: style)
         label.textAlignment = align
         label.translatesAutoresizingMaskIntoConstraints = false
         label.adjustsFontForContentSizeCategory = true
         label.numberOfLines = 0
+
+        // Apply font while preserving bold/italic traits from HTML (e.g. <b> tags),
+        // but also keeping the default font's own traits (e.g. bold) as a baseline.
+        if let targetFont = style.font, text.length > 0 {
+            let mutable = NSMutableAttributedString(attributedString: text)
+            let fullRange = NSRange(location: 0, length: mutable.length)
+
+            applyFont(targetFont, to: mutable, in: fullRange)
+
+            mutable.addAttribute(.foregroundColor, value: style.textColor, range: fullRange)
+
+            // The HTML parser embeds .paragraphStyle with .left/.natural alignment,
+            // which overrides label.textAlignment. Re-apply the requested alignment
+            // to every paragraph style run (preserving other properties like line spacing).
+            mutable.enumerateAttribute(.paragraphStyle, in: fullRange, options: []) { value, range, _ in
+                let ps = ((value as? NSParagraphStyle)?.mutableCopy() as? NSMutableParagraphStyle)
+                    ?? NSMutableParagraphStyle()
+                ps.alignment = align
+                mutable.addAttribute(.paragraphStyle, value: ps, range: range)
+            }
+
+            label.attributedText = mutable
+        } else {
+            label.attributedText = text
+            label.applyTextStyle(style: style)
+        }
+
         return label
     }
     
+    /// Enumerates every font run in `mutable` and replaces it with `targetFont`'s
+    /// family/size while unioning the symbolic traits (bold, italic, etc.) so that:
+    ///  - the default font's own traits (e.g. bold) are always preserved as a baseline, and
+    ///  - traits embedded by the HTML parser (e.g. from <b> tags) are layered on top.
+    private func applyFont(_ targetFont: UIFont,
+                           to mutable: NSMutableAttributedString,
+                           in fullRange: NSRange) {
+        mutable.enumerateAttribute(.font, in: fullRange, options: []) { value, range, _ in
+            let newFont: UIFont
+            if let existingFont = value as? UIFont {
+                let combinedTraits = targetFont.fontDescriptor.symbolicTraits
+                    .union(existingFont.fontDescriptor.symbolicTraits)
+                if let descriptor = targetFont.fontDescriptor
+                    .withFamily(targetFont.familyName)
+                    .withSymbolicTraits(combinedTraits) {
+                    newFont = UIFont(descriptor: descriptor.withSize(targetFont.pointSize),
+                                     size: targetFont.pointSize)
+                } else {
+                    newFont = targetFont
+                }
+            } else {
+                newFont = targetFont
+            }
+            mutable.addAttribute(.font, value: newFont, range: range)
+        }
+    }
+
     /// Returns a UIStackView with specified axis and spacing.
     func createStackView(axis: NSLayoutConstraint.Axis, spacing: CGFloat) -> UIStackView {
         let stackView = UIStackView()
@@ -114,21 +166,7 @@ internal class PopupElements: NSObject{
         mutable.addAttribute(.foregroundColor, value: style.textColor, range: fullRange)
     
         if let font = style.font {
-            mutable.enumerateAttribute(.font, in: fullRange, options: []) { value, range, _ in
-                let newFont: UIFont
-                if let existingFont = value as? UIFont {
-                    let traits = existingFont.fontDescriptor.symbolicTraits
-                    if let descriptor = font.fontDescriptor.withFamily(font.familyName)
-                        .withSymbolicTraits(traits) {
-                        newFont = UIFont(descriptor: descriptor.withSize(font.pointSize), size: font.pointSize)
-                    } else {
-                        newFont = font
-                    }
-                } else {
-                    newFont = font
-                }
-                mutable.addAttribute(.font, value: newFont, range: range)
-            }
+            applyFont(font, to: mutable, in: fullRange)
         }
         // Re-parse the raw HTML with SwiftSoup to find every <a href> and its
         // visible text, then inject the .link attribute at those ranges.
@@ -151,7 +189,7 @@ internal class PopupElements: NSObject{
 
         textView.attributedText = mutable
         textView.linkTextAttributes = [
-            .foregroundColor: style.textColor ?? UIColor.systemBlue,
+            .foregroundColor: style.textColor,
             .underlineStyle: NSUnderlineStyle.single.rawValue
         ]
         return textView

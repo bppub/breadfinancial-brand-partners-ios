@@ -54,6 +54,7 @@ public class BreadPartnerDefaults: NSObject {
         crossColor: .black,
         dividerColor: LIGHT_GRAY_COLOR,
         borderColor: LIGHT_GRAY_COLOR.cgColor,
+        backgroundColor: .white,
         titlePopupTextStyle: TITLE_POPUP_TEXT_STYLE,
         subTitlePopupTextStyle: SUBTITLE_POPUP_TEXT_STYLE,
         headerPopupTextStyle: HEADER_POPUP_TEXT_STYLE,
