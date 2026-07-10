@@ -60,10 +60,11 @@ internal class APIClient: @unchecked Sendable {
         request.httpMethod = method.rawValue
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        var genericHeader: [String: String] = await [
+        let genericHeader: [String: String] = await [
             Constants.headerContentType: Constants.headerContentTypeValue,
             Constants.headerUserAgentKey: CommonUtils().getUserAgent(),
             Constants.headerOriginKey: Constants.headerOriginValue,
+            Constants.headerPlatformKey: Constants.headerPlatformValue,
         ]
         
         var updatedHeaders = (headers ?? [:]).merging(
