@@ -1,0 +1,23 @@
+name: Run Unit Test
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Xcode
+        run: |
+          sudo xcode-select --install || true
+
+      - name: Run Unit Tests
+        run: |
+          xcodebuild test \
+            -workspace Example/BreadPartnersSDK.xcworkspace \
+            -scheme BreadPartnersSDK_Tests \
+            -destinati on 'platform=iOS Simulator,name=iPhone 17'
