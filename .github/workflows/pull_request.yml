@@ -18,6 +18,9 @@ jobs:
       - name: Print 
         run: cd Example xcodebuild -list
 
+      - name: Install pods 
+        run: pod install --project-directory=Example 
+
       - name: Run Unit Tests
         run: |
           xcodebuild test \
