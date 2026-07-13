@@ -20,4 +20,4 @@ jobs:
           xcodebuild test \
             -workspace Example/BreadPartnersSDK.xcworkspace \
             -scheme BreadPartnersSDK_Tests \
-            -destinati on 'platform=iOS Simulator,name=iPhone 17'
+            -destination 'platform=iOS Simulator,name=iPhone 17'
