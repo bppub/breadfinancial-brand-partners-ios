@@ -22,5 +22,39 @@ public class TestData: NSObject {
 
     public let placementConfigurations: [String: [String: Any]] = [:]
     
-    public let styleStruct: [String: [String: Any]] = [:]
+    public let styleStruct: [String: [String: Any]] = [
+        "red": [
+            "primaryColor": "#d50132",
+            "lightColor": "#b8bdc0",
+            "darkColor": "#000000",
+            "boxColor": "#ececec",
+            "fontFamily": "ArialMT",
+            "smallTextSize": 12,
+            "mediumTextSize": 15,
+            "largeTextSize": 18,
+            "xlargeTextSize": 20
+        ],
+        "green": [
+            "primaryColor": "#28A745",
+            "lightColor": "#68ba7b",
+            "darkColor": "#19692C",
+            "boxColor": "#E6F9EF",
+            "fontFamily": "ArialMT",
+            "smallTextSize": 14,
+            "mediumTextSize": 16,
+            "largeTextSize": 20,
+            "xlargeTextSize": 22
+        ],
+        "blue": [
+            "primaryColor": "#007BFF",
+            "lightColor": "#6da3de",
+            "darkColor": "#003F7F",
+            "boxColor": "#EAF4FF",
+            "fontFamily": "ArialMT",
+            "smallTextSize": 16,
+            "mediumTextSize": 18,
+            "largeTextSize": 22,
+            "xlargeTextSize": 24
+        ]
+    ]
 }
