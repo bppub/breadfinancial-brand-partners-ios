@@ -20,5 +20,7 @@ public class TestData: NSObject {
 
     private override init() {}
 
-    public let placementConfigurations: [String: [String: Any]] = []
+    public let placementConfigurations: [String: [String: Any]] = [:]
+    
+    public let styleStruct: [String: [String: Any]] = [:]
 }
