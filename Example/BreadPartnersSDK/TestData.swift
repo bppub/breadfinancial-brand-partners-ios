@@ -14,4 +14,11 @@ import UIKit
 import BreadPartnersSDK
 
 /// `TestData` class provides default configurations/styles/properties used across the BreadPartner SDK.
-public class TestData: NSObject {}
+public class TestData: NSObject {
+
+    public static let shared = TestData()
+
+    private override init() {}
+
+    public let placementConfigurations: [String: [String: Any]] = []
+}
