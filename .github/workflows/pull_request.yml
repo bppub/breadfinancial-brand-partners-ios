@@ -21,6 +21,6 @@ jobs:
       - name: Run Unit Tests
         run: |
           xcodebuild test \
-            -workspace BreadPartnersSDK.xcworkspace \
+            -workspace Example/BreadPartnersSDK.xcworkspace \
             -scheme BreadPartnersSDK_Tests \
             -destination 'platform=iOS Simulator,name=iPhone 17'
