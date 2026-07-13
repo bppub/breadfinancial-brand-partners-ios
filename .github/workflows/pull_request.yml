@@ -16,7 +16,7 @@ jobs:
           sudo xcode-select --install || true
 
       - name: Print 
-        run: xcodebuild -list
+        run: cd Example xcodebuild -list
 
       - name: Run Unit Tests
         run: |
