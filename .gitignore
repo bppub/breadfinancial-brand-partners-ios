@@ -50,5 +50,3 @@ fastlane/test_output
 
 
 # Ignore 
-**/TestData.swift
-Example/BreadPartnersSDK/TestData.swift
