@@ -17,6 +17,8 @@
 		12D9F1F02D5394E000799C72 /* Lato-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 12D9F1EE2D5394E000799C72 /* Lato-Bold.ttf */; };
 		12D9F1F22D53956800799C72 /* Poppins-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 12D9F1F12D53956800799C72 /* Poppins-Bold.otf */; };
 		12D9F1F32D53956800799C72 /* Poppins-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 12D9F1F12D53956800799C72 /* Poppins-Bold.otf */; };
+		4E173DCA3006976500B394B5 /* OfferResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E173DC93006976500B394B5 /* OfferResponse.swift */; };
+		4E173DD0300698C600B394B5 /* BreadPartnersEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E173DCF300698C600B394B5 /* BreadPartnersEnvironment.swift */; };
 		4EBA47962F71846400FE0D88 /* Podfile.lock in Resources */ = {isa = PBXBuildFile; fileRef = 4EBA47952F71846400FE0D88 /* Podfile.lock */; };
 		4EBA47972F71846400FE0D88 /* Podfile in Resources */ = {isa = PBXBuildFile; fileRef = 4EBA47942F71846400FE0D88 /* Podfile */; };
 		4EBA47982F71846400FE0D88 /* Podfile.lock in Resources */ = {isa = PBXBuildFile; fileRef = 4EBA47952F71846400FE0D88 /* Podfile.lock */; };
@@ -26,7 +28,6 @@
 		607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 607FACD91AFB9204008FA782 /* Main.storyboard */; };
 		607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
-		607FACEC1AFB9204008FA782 /* Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACEB1AFB9204008FA782 /* Tests.swift */; };
 		9E683B79640311BC11F4D9B5 /* Pods_BreadPartnersSDK_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 536656BA262FB1F56BC7D6A2 /* Pods_BreadPartnersSDK_Example.framework */; };
 		C37355C45A782A5282840B43 /* Pods_BreadPartnersSDK_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 651C4B8ED59CB7F845082BB7 /* Pods_BreadPartnersSDK_Tests.framework */; };
 /* End PBXBuildFile section */
@@ -52,6 +53,8 @@
 		1469BBF46180D765F71B4C3C /* Pods-BreadPartnersSDK_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BreadPartnersSDK_Example.debug.xcconfig"; path = "Target Support Files/Pods-BreadPartnersSDK_Example/Pods-BreadPartnersSDK_Example.debug.xcconfig"; sourceTree = "<group>"; };
 		198F385AA96D18A5C1A70BE7 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		25DAC38EDE3AC67C92EC3B0B /* Pods-BreadPartnersSDK_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BreadPartnersSDK_Tests.debug.xcconfig"; path = "Target Support Files/Pods-BreadPartnersSDK_Tests/Pods-BreadPartnersSDK_Tests.debug.xcconfig"; sourceTree = "<group>"; };
+		4E173DC93006976500B394B5 /* OfferResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfferResponse.swift; sourceTree = "<group>"; };
+		4E173DCF300698C600B394B5 /* BreadPartnersEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BreadPartnersEnvironment.swift; sourceTree = "<group>"; };
 		4EBA47942F71846400FE0D88 /* Podfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Podfile; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		4EBA47952F71846400FE0D88 /* Podfile.lock */ = {isa = PBXFileReference; lastKnownFileType = text; path = Podfile.lock; sourceTree = "<group>"; };
 		536656BA262FB1F56BC7D6A2 /* Pods_BreadPartnersSDK_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BreadPartnersSDK_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -64,7 +67,6 @@
 		607FACDF1AFB9204008FA782 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		607FACE51AFB9204008FA782 /* BreadPartnersSDK_Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BreadPartnersSDK_Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACEA1AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		607FACEB1AFB9204008FA782 /* Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests.swift; sourceTree = "<group>"; };
 		651C4B8ED59CB7F845082BB7 /* Pods_BreadPartnersSDK_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BreadPartnersSDK_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9A17460150109AC2B569919E /* BreadPartnersSDK.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = BreadPartnersSDK.podspec; path = ../BreadPartnersSDK.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		AB54074BD23578AFCD7810E8 /* Pods-BreadPartnersSDK_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BreadPartnersSDK_Example.release.xcconfig"; path = "Target Support Files/Pods-BreadPartnersSDK_Example/Pods-BreadPartnersSDK_Example.release.xcconfig"; sourceTree = "<group>"; };
@@ -98,6 +100,23 @@
 				12D9F1E62D53932600799C72 /* JosefinSans-Bold.ttf */,
 			);
 			path = Fonts;
+			sourceTree = "<group>";
+		};
+		4E173DC73006973500B394B5 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				4E173DC83006974400B394B5 /* Models */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		4E173DC83006974400B394B5 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				4E173DC93006976500B394B5 /* OfferResponse.swift */,
+				4E173DCF300698C600B394B5 /* BreadPartnersEnvironment.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 		607FACC71AFB9204008FA782 = {
@@ -150,7 +169,7 @@
 		607FACE81AFB9204008FA782 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
-				607FACEB1AFB9204008FA782 /* Tests.swift */,
+				4E173DC73006973500B394B5 /* Core */,
 				607FACE91AFB9204008FA782 /* Supporting Files */,
 			);
 			path = Tests;
@@ -391,8 +410,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4E173DD0300698C600B394B5 /* BreadPartnersEnvironment.swift in Sources */,
+				4E173DCA3006976500B394B5 /* OfferResponse.swift in Sources */,
 				12396DF72D88379000806D59 /* RTPSController.swift in Sources */,
-				607FACEC1AFB9204008FA782 /* Tests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
