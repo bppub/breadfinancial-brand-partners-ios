@@ -12,6 +12,8 @@ Example/DerivedData/
 
 # Xcode
 *.xcworkspace
+xcuserdata/
+*.xcuserdatad   
 *.xcuserdata
 *.xccheckout
 *.pbxuser
