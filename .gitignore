@@ -11,6 +11,7 @@ Example/build/
 Example/DerivedData/
 
 # Xcode
+*.xcworkspace
 *.xcuserdata
 *.xccheckout
 *.pbxuser
@@ -50,3 +51,5 @@ fastlane/test_output
 
 
 # Ignore 
+**/TestData.swift
+Example/BreadPartnersSDK/TestData.swift
