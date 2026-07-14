@@ -17,12 +17,12 @@
 		12D9F1F02D5394E000799C72 /* Lato-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 12D9F1EE2D5394E000799C72 /* Lato-Bold.ttf */; };
 		12D9F1F22D53956800799C72 /* Poppins-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 12D9F1F12D53956800799C72 /* Poppins-Bold.otf */; };
 		12D9F1F32D53956800799C72 /* Poppins-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 12D9F1F12D53956800799C72 /* Poppins-Bold.otf */; };
-		4E173DCA3006976500B394B5 /* OfferResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E173DC93006976500B394B5 /* OfferResponse.swift */; };
-		4E173DD0300698C600B394B5 /* BreadPartnersEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E173DCF300698C600B394B5 /* BreadPartnersEnvironment.swift */; };
 		4EBA47962F71846400FE0D88 /* Podfile.lock in Resources */ = {isa = PBXBuildFile; fileRef = 4EBA47952F71846400FE0D88 /* Podfile.lock */; };
 		4EBA47972F71846400FE0D88 /* Podfile in Resources */ = {isa = PBXBuildFile; fileRef = 4EBA47942F71846400FE0D88 /* Podfile */; };
 		4EBA47982F71846400FE0D88 /* Podfile.lock in Resources */ = {isa = PBXBuildFile; fileRef = 4EBA47952F71846400FE0D88 /* Podfile.lock */; };
 		4EBA47992F71846400FE0D88 /* Podfile in Resources */ = {isa = PBXBuildFile; fileRef = 4EBA47942F71846400FE0D88 /* Podfile */; };
+		4ED6382C3006B077005BB3DE /* OfferResponseTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ED6382B3006B077005BB3DE /* OfferResponseTest.swift */; };
+		4ED6382D3006B077005BB3DE /* BreadPartnersEnvironmentTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ED6382A3006B077005BB3DE /* BreadPartnersEnvironmentTest.swift */; };
 		607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
 		607FACD81AFB9204008FA782 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD71AFB9204008FA782 /* ViewController.swift */; };
 		607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 607FACD91AFB9204008FA782 /* Main.storyboard */; };
@@ -53,10 +53,10 @@
 		1469BBF46180D765F71B4C3C /* Pods-BreadPartnersSDK_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BreadPartnersSDK_Example.debug.xcconfig"; path = "Target Support Files/Pods-BreadPartnersSDK_Example/Pods-BreadPartnersSDK_Example.debug.xcconfig"; sourceTree = "<group>"; };
 		198F385AA96D18A5C1A70BE7 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		25DAC38EDE3AC67C92EC3B0B /* Pods-BreadPartnersSDK_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BreadPartnersSDK_Tests.debug.xcconfig"; path = "Target Support Files/Pods-BreadPartnersSDK_Tests/Pods-BreadPartnersSDK_Tests.debug.xcconfig"; sourceTree = "<group>"; };
-		4E173DC93006976500B394B5 /* OfferResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfferResponse.swift; sourceTree = "<group>"; };
-		4E173DCF300698C600B394B5 /* BreadPartnersEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BreadPartnersEnvironment.swift; sourceTree = "<group>"; };
 		4EBA47942F71846400FE0D88 /* Podfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Podfile; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		4EBA47952F71846400FE0D88 /* Podfile.lock */ = {isa = PBXFileReference; lastKnownFileType = text; path = Podfile.lock; sourceTree = "<group>"; };
+		4ED6382A3006B077005BB3DE /* BreadPartnersEnvironmentTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BreadPartnersEnvironmentTest.swift; sourceTree = "<group>"; };
+		4ED6382B3006B077005BB3DE /* OfferResponseTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfferResponseTest.swift; sourceTree = "<group>"; };
 		536656BA262FB1F56BC7D6A2 /* Pods_BreadPartnersSDK_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BreadPartnersSDK_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACD01AFB9204008FA782 /* BreadPartnersSDK_Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BreadPartnersSDK_Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACD41AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -113,8 +113,8 @@
 		4E173DC83006974400B394B5 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				4E173DC93006976500B394B5 /* OfferResponse.swift */,
-				4E173DCF300698C600B394B5 /* BreadPartnersEnvironment.swift */,
+				4ED6382A3006B077005BB3DE /* BreadPartnersEnvironmentTest.swift */,
+				4ED6382B3006B077005BB3DE /* OfferResponseTest.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -410,8 +410,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4E173DD0300698C600B394B5 /* BreadPartnersEnvironment.swift in Sources */,
-				4E173DCA3006976500B394B5 /* OfferResponse.swift in Sources */,
+				4ED6382C3006B077005BB3DE /* OfferResponseTest.swift in Sources */,
+				4ED6382D3006B077005BB3DE /* BreadPartnersEnvironmentTest.swift in Sources */,
 				12396DF72D88379000806D59 /* RTPSController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
