@@ -15,9 +15,6 @@ jobs:
         run: |
           sudo xcode-select --install || true
 
-      - name: Print 
-        run: cd Example xcodebuild -list
-
       - name: Install pods 
         run: pod install --project-directory=Example 
 
