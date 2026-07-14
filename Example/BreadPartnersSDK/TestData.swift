@@ -22,17 +22,5 @@ public class TestData: NSObject {
 
     public let placementConfigurations: [String: [String: Any]] = [:]
     
-    public let styleStruct: [String: [String: Any]] = [
-        "blue": [
-            "primaryColor": "#007BFF",
-            "lightColor": "#6da3de",
-            "darkColor": "#003F7F",
-            "boxColor": "#EAF4FF",
-            "fontFamily": "ArialMT",
-            "smallTextSize": 16,
-            "mediumTextSize": 18,
-            "largeTextSize": 22,
-            "xlargeTextSize": 24
-        ]
-    ]
+    public let styleStruct: [String: [String: Any]] = [:]
 }

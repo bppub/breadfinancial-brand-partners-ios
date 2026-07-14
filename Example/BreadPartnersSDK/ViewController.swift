@@ -64,18 +64,18 @@ class ViewController: UIViewController {
 
         // MARK: For development purposes
         let style = TestData.shared.styleStruct["blue"] ?? [:]
-        let primaryColor = style["primaryColor"] as! String
-        let lightColor = style["lightColor"] as! String
-        let darkColor = style["darkColor"] as! String
-        let boxColor = style["boxColor"] as! String
+        let primaryColor = style["primaryColor"] as? String ?? "#0000FF"
+        let lightColor = style["lightColor"] as? String ?? "#FFFFFF"
+        let darkColor = style["darkColor"] as? String ?? "#000000"
+        let boxColor = style["boxColor"] as? String ?? "#CCCCCC"
         let blackColor = "#000000"
 
-        let fontFamily = style["fontFamily"] as! String
+        let fontFamily = style["fontFamily"] as? String ?? "ArialMT"
 
-        let smallTextSize = style["smallTextSize"] as! Int
-        let mediumTextSize = style["mediumTextSize"] as! Int
-        let largeTextSize = style["largeTextSize"] as! Int
-        let xlargeTextSize = style["xlargeTextSize"] as! Int
+        let smallTextSize = style["smallTextSize"] as? Int ?? 16
+        let mediumTextSize = style["mediumTextSize"] as? Int ?? 18
+        let largeTextSize = style["largeTextSize"] as? Int ?? 22
+        let xlargeTextSize = style["xlargeTextSize"] as? Int ?? 24
 
         let placementData = PlacementData(
             financingType: financingType,
