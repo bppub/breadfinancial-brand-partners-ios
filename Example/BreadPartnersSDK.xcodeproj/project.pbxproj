@@ -10,7 +10,6 @@
 		12396DF62D88379000806D59 /* RTPSController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12396DF52D88378800806D59 /* RTPSController.swift */; };
 		12396DF72D88379000806D59 /* RTPSController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12396DF52D88378800806D59 /* RTPSController.swift */; };
 		12396DFD2D883F6B00806D59 /* OpenExperienceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12396DFC2D883F6500806D59 /* OpenExperienceController.swift */; };
-		12D64FCC2D9BB8D500DA541A /* TestData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12D64FCB2D9BB8D500DA541A /* TestData.swift */; };
 		12D9F1E82D53932600799C72 /* JosefinSans-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 12D9F1E62D53932600799C72 /* JosefinSans-Bold.ttf */; };
 		12D9F1EA2D53932600799C72 /* JosefinSans-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 12D9F1E62D53932600799C72 /* JosefinSans-Bold.ttf */; };
 		12D9F1EF2D5394E000799C72 /* Lato-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 12D9F1EE2D5394E000799C72 /* Lato-Bold.ttf */; };
@@ -45,7 +44,6 @@
 /* Begin PBXFileReference section */
 		12396DF52D88378800806D59 /* RTPSController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTPSController.swift; sourceTree = "<group>"; };
 		12396DFC2D883F6500806D59 /* OpenExperienceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenExperienceController.swift; sourceTree = "<group>"; };
-		12D64FCB2D9BB8D500DA541A /* TestData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestData.swift; sourceTree = "<group>"; };
 		12D9F1E62D53932600799C72 /* JosefinSans-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "JosefinSans-Bold.ttf"; sourceTree = "<group>"; };
 		12D9F1EE2D5394E000799C72 /* Lato-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Lato-Bold.ttf"; sourceTree = "<group>"; };
 		12D9F1F12D53956800799C72 /* Poppins-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Poppins-Bold.otf"; sourceTree = "<group>"; };
@@ -143,7 +141,6 @@
 		607FACD21AFB9204008FA782 /* Example for BreadPartnersSDK */ = {
 			isa = PBXGroup;
 			children = (
-				12D64FCB2D9BB8D500DA541A /* TestData.swift */,
 				12A79DA42D51FD700016A5A8 /* Fonts */,
 				607FACD51AFB9204008FA782 /* AppDelegate.swift */,
 				607FACD71AFB9204008FA782 /* ViewController.swift */,
@@ -401,7 +398,6 @@
 				607FACD81AFB9204008FA782 /* ViewController.swift in Sources */,
 				12396DFD2D883F6B00806D59 /* OpenExperienceController.swift in Sources */,
 				607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */,
-				12D64FCC2D9BB8D500DA541A /* TestData.swift in Sources */,
 				12396DF62D88379000806D59 /* RTPSController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
