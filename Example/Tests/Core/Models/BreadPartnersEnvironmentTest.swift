@@ -1,10 +1,14 @@
+//------------------------------------------------------------------------------
+//  File:          BreadPartnersEnvironment.swift
+//  Author(s):     Bread Financial
+//  Date:          14 July 2026
 //
-//  BreadPartnersEnvironment.swift
-//  BreadPartnersSDK_Tests
+//  Descriptions:  This file is part of the BreadPartnersSDK for iOS,
+//  providing UI components and functionalities to integrate Bread Financial
+//  services into partner applications.
 //
-//  Created by Joncarlos Tavarez on 7/14/26.
-//  Copyright © 2026 CocoaPods. All rights reserved.
-//
+//  © 2026 Bread Financial
+//------------------------------------------------------------------------------
 
 import Testing
 @testable import BreadPartnersSDK
