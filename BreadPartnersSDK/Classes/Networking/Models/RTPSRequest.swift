@@ -30,7 +30,6 @@ struct RTPSRequest: Codable {
     let overrideConfig: OverrideConfig?
     let prescreenId: String?
     let customerAcceptedOffer: Bool?
-    let platform: String
     let alternativePhone: String?
     let mobilePhone: String?
     let emailAddress: String?
@@ -76,7 +75,6 @@ struct RTPSRequest: Codable {
         self.overrideConfig = overrideConfig
         self.prescreenId = prescreenId
         self.customerAcceptedOffer = customerAcceptedOffer
-        self.platform = "ios"
         self.emailAddress = emailAddress
         self.mobilePhone = mobilePhone
         self.alternativePhone = alternativePhone

@@ -23,6 +23,8 @@ class Constants {
     static let headerAuthorityKey = "authority"
     static let headerAuthorityValue = "metrics.kmsmep.com"
     static let headerAcceptKey = "Accept"
+    static let headerPlatformKey = "platform"
+    static let headerPlatformValue = "ios"
     static let headerAcceptValue = "*/*"
     static let headerAcceptEncodingKey = "Accept-Encoding"
     static let headerAcceptEncodingValue = "gzip, deflate, br, zstd"
