@@ -48,7 +48,8 @@ class ViewController: UIViewController {
         // like placement ID, SDK transaction ID, environment, price, and brand ID.
         // This allows testing of various placement setups by fetching specific configurations
         // based on the placement type key.
-        let placementRequestType: [String: Any] = TestData.shared.placementConfigurations["textPlacementRequestType1"]!
+//        let placementRequestType: [String: Any] = TestData.shared.placementConfigurations["textPlacementRequestType1"]!
+        let placementRequestType: [String: Any] = [:]
         let placementID = placementRequestType["placementID"] as? String
         let price = (placementRequestType["price"] as? Int)
         let loyaltyId = (placementRequestType["loyaltyId"] as? String)
@@ -63,19 +64,20 @@ class ViewController: UIViewController {
             as? BreadPartnersFinancingType
 
         // MARK: For development purposes
-        let style = TestData.shared.styleStruct["blue"]!
-        let primaryColor = style["primaryColor"] as! String
-        let lightColor = style["lightColor"] as! String
-        let darkColor = style["darkColor"] as! String
-        let boxColor = style["boxColor"] as! String
+//        let style = TestData.shared.styleStruct["blue"]!
+        let style: [String: Any] = [:]
+        let primaryColor = style["primaryColor"] as? String ?? "#0000FF"
+        let lightColor = style["lightColor"] as? String ?? "#FFFFFF"
+        let darkColor = style["darkColor"] as? String ?? "#000000"
+        let boxColor = style["boxColor"] as? String ?? "#CCCCCC"
         let blackColor = "#000000"
 
-        let fontFamily = style["fontFamily"] as! String
+        let fontFamily = style["fontFamily"] as? String ?? "ArialMT"
 
-        let smallTextSize = style["smallTextSize"] as! Int
-        let mediumTextSize = style["mediumTextSize"] as! Int
-        let largeTextSize = style["largeTextSize"] as! Int
-        let xlargeTextSize = style["xlargeTextSize"] as! Int
+        let smallTextSize = style["smallTextSize"] as? Int ?? 16
+        let mediumTextSize = style["mediumTextSize"] as? Int ?? 18
+        let largeTextSize = style["largeTextSize"] as? Int ?? 22
+        let xlargeTextSize = style["xlargeTextSize"] as? Int ?? 24
 
         let placementData = PlacementData(
             financingType: financingType,
@@ -353,7 +355,8 @@ class ViewController: UIViewController {
 
     
     func openExperienceFlow() {
-        let placementRequestType: [String: Any] = TestData.shared.placementConfigurations["textPlacementRequestType1"]!
+//        let placementRequestType: [String: Any] = TestData.shared.placementConfigurations["textPlacementRequestType1"]!
+        let placementRequestType: [String: Any] = [:]
         let placementID = placementRequestType["placementID"] as? String
         let price = (placementRequestType["price"] as? Int)
         let loyaltyId = (placementRequestType["loyaltyId"] as? String)
