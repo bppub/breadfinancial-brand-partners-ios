@@ -98,4 +98,9 @@ public enum BreadPartnerEvents {
 
     /// Fires when the WebView sends an OFFER RESPONSE. The response parameter contains the OfferResponse value corresponding to the payload received from the WebView.
     case offerResponse(response: OfferResponse)
+
+    /// Detects when the user interacts (taps) outside of the popup/web view content,
+    /// i.e. on the dimmed background surrounding the popup.
+    /// - Parameter location: The tap location in the popup's root view coordinate space.
+    case outsideInteractionDetected(location: CGPoint)
 }

@@ -272,6 +272,10 @@ class ViewController: UIViewController {
                 case .renderPopupView(let view):
                     self.present(view, animated: true)
                     print("BreadPartnerSDK::Successfully rendered PopupView.")
+                    
+                case .popupClosed:
+                    print("this is a popup closed event from host app.")
+                    self.dismiss(animated: true, completion: nil)
                 default:
                     print("BreadPartnerSDK:: \(event)")
                     break
