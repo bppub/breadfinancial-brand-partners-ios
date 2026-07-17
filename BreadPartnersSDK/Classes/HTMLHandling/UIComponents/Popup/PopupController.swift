@@ -176,7 +176,7 @@ internal class PopupController: UIViewController, AppRestartListener, UITextView
         }
 
         callback(.popupClosed)
-//        dismiss(animated: true, completion: nil)
+        dismiss(animated: true, completion: nil)
     }
 
     /// Ensures the outside-tap recognizer only receives touches that land outside
