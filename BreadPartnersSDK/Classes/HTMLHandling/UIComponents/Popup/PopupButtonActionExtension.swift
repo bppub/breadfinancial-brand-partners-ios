@@ -16,7 +16,7 @@ import UIKit
 extension PopupController {
     
     /// Handles the close button tap event..
-    @objc func closeButtonTapped() {
+    @objc func dismissPopup() {
         callback(.popupClosed)
         dismiss(animated: true, completion: nil)
     }
