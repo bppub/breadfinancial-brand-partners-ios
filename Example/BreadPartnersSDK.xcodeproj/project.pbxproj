@@ -20,7 +20,6 @@
 		4EBA47972F71846400FE0D88 /* Podfile in Resources */ = {isa = PBXBuildFile; fileRef = 4EBA47942F71846400FE0D88 /* Podfile */; };
 		4EBA47982F71846400FE0D88 /* Podfile.lock in Resources */ = {isa = PBXBuildFile; fileRef = 4EBA47952F71846400FE0D88 /* Podfile.lock */; };
 		4EBA47992F71846400FE0D88 /* Podfile in Resources */ = {isa = PBXBuildFile; fileRef = 4EBA47942F71846400FE0D88 /* Podfile */; };
-		4ED63833300954EB005BB3DE /* TestData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ED63832300954EB005BB3DE /* TestData.swift */; };
 		607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
 		607FACD81AFB9204008FA782 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD71AFB9204008FA782 /* ViewController.swift */; };
 		607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 607FACD91AFB9204008FA782 /* Main.storyboard */; };
@@ -53,7 +52,6 @@
 		25DAC38EDE3AC67C92EC3B0B /* Pods-BreadPartnersSDK_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BreadPartnersSDK_Tests.debug.xcconfig"; path = "Target Support Files/Pods-BreadPartnersSDK_Tests/Pods-BreadPartnersSDK_Tests.debug.xcconfig"; sourceTree = "<group>"; };
 		4EBA47942F71846400FE0D88 /* Podfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Podfile; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		4EBA47952F71846400FE0D88 /* Podfile.lock */ = {isa = PBXFileReference; lastKnownFileType = text; path = Podfile.lock; sourceTree = "<group>"; };
-		4ED63832300954EB005BB3DE /* TestData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestData.swift; sourceTree = "<group>"; };
 		536656BA262FB1F56BC7D6A2 /* Pods_BreadPartnersSDK_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BreadPartnersSDK_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACD01AFB9204008FA782 /* BreadPartnersSDK_Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BreadPartnersSDK_Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACD41AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -124,7 +122,6 @@
 		607FACD21AFB9204008FA782 /* Example for BreadPartnersSDK */ = {
 			isa = PBXGroup;
 			children = (
-				4ED63832300954EB005BB3DE /* TestData.swift */,
 				12A79DA42D51FD700016A5A8 /* Fonts */,
 				607FACD51AFB9204008FA782 /* AppDelegate.swift */,
 				607FACD71AFB9204008FA782 /* ViewController.swift */,
@@ -382,7 +379,6 @@
 				607FACD81AFB9204008FA782 /* ViewController.swift in Sources */,
 				12396DFD2D883F6B00806D59 /* OpenExperienceController.swift in Sources */,
 				607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */,
-				4ED63833300954EB005BB3DE /* TestData.swift in Sources */,
 				12396DF62D88379000806D59 /* RTPSController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
