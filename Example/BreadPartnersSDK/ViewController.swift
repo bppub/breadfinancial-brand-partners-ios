@@ -272,7 +272,6 @@ class ViewController: UIViewController {
                 case .renderPopupView(let view):
                     self.present(view, animated: true)
                     print("BreadPartnerSDK::Successfully rendered PopupView.")
-                    
                 default:
                     print("BreadPartnerSDK:: \(event)")
                     break
