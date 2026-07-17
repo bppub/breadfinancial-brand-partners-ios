@@ -14,7 +14,7 @@ import Foundation
 import UIKit
 import WebKit
 
-internal class PopupController: UIViewController, AppRestartListener, UITextViewDelegate, UIGestureRecognizerDelegate {
+internal class PopupController: UIViewController, AppRestartListener, UITextViewDelegate {
 
     var integrationKey: String
     var popupModel: PopupPlacementModel
