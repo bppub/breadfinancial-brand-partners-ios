@@ -17,16 +17,6 @@ internal class PopupElements: NSObject{
     
     static let shared = PopupElements()
 
-    /// Scale factor applied to superscript text relative to its surrounding
-    /// (base) font size. For example `0.6` renders superscripts at 60% of the
-    /// body text size. Change this value to make superscripts larger/smaller.
-    var superscriptFontScale: CGFloat = 0.6
-
-    /// Vertical offset of superscript text expressed as a fraction of the base
-    /// font's point size. Higher values raise the superscript further above the
-    /// baseline. Adjust alongside `superscriptFontScale` if needed.
-    var superscriptBaselineFactor: CGFloat = 0.35
-    
     private override init() {
         super.init()
     }
@@ -65,7 +55,7 @@ internal class PopupElements: NSObject{
         return containerView
     }
     
-    func createLabel(withText text: NSAttributedString,style:PopupTextStyle,align: NSTextAlignment = .center) -> UILabel {
+    func createLabel(withText text: NSAttributedString, style:PopupTextStyle, align: NSTextAlignment = .center) -> UILabel {
         let label = UILabel()
         label.textAlignment = align
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -82,8 +72,8 @@ internal class PopupElements: NSObject{
 
             // Re-shrink superscript runs (must run after applyFont, which
             // otherwise forces them back to the body point size).
-            applySuperscriptStyling(to: mutable, baseFont: targetFont, in: fullRange)
-
+            applySuperscriptStyling(to: mutable, baseFont: targetFont, in: fullRange, scale: style.superscriptTextScale)
+ 
             mutable.addAttribute(.foregroundColor, value: style.textColor, range: fullRange)
 
             // The HTML parser embeds .paragraphStyle with .left/.natural alignment,
@@ -150,8 +140,7 @@ internal class PopupElements: NSObject{
     private func applySuperscriptStyling(to mutable: NSMutableAttributedString,
                                          baseFont: UIFont,
                                          in fullRange: NSRange,
-                                         scale: CGFloat? = nil) {
-        let effectiveScale = scale ?? superscriptFontScale
+                                         scale: CGFloat) {
         let superscriptKey = NSAttributedString.Key(rawValue: "NSSuperScript")
 
         mutable.enumerateAttributes(in: fullRange, options: []) { attributes, range, _ in
@@ -160,7 +149,7 @@ internal class PopupElements: NSObject{
             let isSuperscript = baselineOffset > 0 || superscriptLevel > 0
             guard isSuperscript else { return }
 
-            let superSize = baseFont.pointSize * effectiveScale
+            let superSize = baseFont.pointSize * scale
 
             // Preserve any bold/italic traits the run already carries.
             let existingFont = (attributes[.font] as? UIFont) ?? baseFont
@@ -173,9 +162,6 @@ internal class PopupElements: NSObject{
             let superFont = UIFont(descriptor: descriptor, size: superSize)
 
             mutable.addAttribute(.font, value: superFont, range: range)
-            mutable.addAttribute(.baselineOffset,
-                                 value: baseFont.pointSize * superscriptBaselineFactor,
-                                 range: range)
         }
     }
 
@@ -229,7 +215,7 @@ internal class PopupElements: NSObject{
         if let font = style.font {
             applyFont(font, to: mutable, in: fullRange)
             // Re-shrink superscript runs after font normalization.
-            applySuperscriptStyling(to: mutable, baseFont: font, in: fullRange)
+            applySuperscriptStyling(to: mutable, baseFont: font, in: fullRange, scale: style.superscriptTextScale)
         }
         // Re-parse the raw HTML with SwiftSoup to find every <a href> and its
         // visible text, then inject the .link attribute at those ranges.

@@ -94,13 +94,16 @@ public struct PopUpStyling: @unchecked Sendable {
 public struct PopupTextStyle: @unchecked Sendable {
     public var font: UIFont? = nil
     public var textColor: UIColor
+    public var superscriptTextScale: CGFloat
 
     public init(
         font: UIFont? = nil,
-        textColor: UIColor = BreadPartnerDefaults.GRAY_COLOR
+        textColor: UIColor = BreadPartnerDefaults.GRAY_COLOR,
+        superscriptTextScale: CGFloat = BreadPartnerDefaults.SUPERSCRIPT_TEXT_SCALE
     ) {
         self.font = font
         self.textColor = textColor
+        self.superscriptTextScale = superscriptTextScale
     }
 }
 
