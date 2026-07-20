@@ -49,7 +49,7 @@ extension PopupController {
 
             closeButton = PopupElements.shared.addCloseButton(
                 target: self, color: popupStyle.crossColor,
-                action: #selector(closeButtonTapped))
+                action: #selector(dismissPopup))
             dividerTop = PopupElements.shared.createHorizontalDivider(
                 color: popupStyle.dividerColor)
             dividerBottom = PopupElements.shared.createHorizontalDivider(

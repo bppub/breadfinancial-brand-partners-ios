@@ -89,7 +89,19 @@ internal class PopupController: UIViewController, AppRestartListener, UITextView
         Task {
             await setupUI()
         }
+ 
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleBackgroundTap(_:)))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
     }
+ 
+    @objc private func handleBackgroundTap(_ gesture: UITapGestureRecognizer) {
+        let location = gesture.location(in: view)
+        if let popupView = popupView, !popupView.frame.contains(location) {
+            dismissPopup()
+        }
+    }
+ 
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
@@ -142,7 +154,7 @@ internal class PopupController: UIViewController, AppRestartListener, UITextView
     func handleWebViewEvent(event: BreadPartnerEvents) {
         switch event {
         case .popupClosed:
-            closeButtonTapped()
+            dismissPopup()
         default:
             callback(event)
         }
