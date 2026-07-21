@@ -72,7 +72,7 @@ internal class PopupElements: NSObject{
 
             // Re-shrink superscript runs (must run after applyFont, which
             // otherwise forces them back to the body point size).
-            applySuperscriptStyling(to: mutable, baseFont: targetFont, in: fullRange, scale: style.superscriptTextScale)
+            applySuperscriptStyling(to: mutable, baseFont: targetFont, in: fullRange)
  
             mutable.addAttribute(.foregroundColor, value: style.textColor, range: fullRange)
 
@@ -139,8 +139,7 @@ internal class PopupElements: NSObject{
     ///     `superscriptFontScale`).
     private func applySuperscriptStyling(to mutable: NSMutableAttributedString,
                                          baseFont: UIFont,
-                                         in fullRange: NSRange,
-                                         scale: CGFloat) {
+                                         in fullRange: NSRange) {
         let superscriptKey = NSAttributedString.Key(rawValue: "NSSuperScript")
 
         mutable.enumerateAttributes(in: fullRange, options: []) { attributes, range, _ in
@@ -149,7 +148,7 @@ internal class PopupElements: NSObject{
             let isSuperscript = baselineOffset > 0 || superscriptLevel > 0
             guard isSuperscript else { return }
 
-            let superSize = baseFont.pointSize * scale
+            let superSize = baseFont.pointSize * BreadPartnerDefaults.SUPERSCRIPT_TEXT_SCALE
 
             // Preserve any bold/italic traits the run already carries.
             let existingFont = (attributes[.font] as? UIFont) ?? baseFont
@@ -215,7 +214,7 @@ internal class PopupElements: NSObject{
         if let font = style.font {
             applyFont(font, to: mutable, in: fullRange)
             // Re-shrink superscript runs after font normalization.
-            applySuperscriptStyling(to: mutable, baseFont: font, in: fullRange, scale: style.superscriptTextScale)
+            applySuperscriptStyling(to: mutable, baseFont: font, in: fullRange)
         }
         // Re-parse the raw HTML with SwiftSoup to find every <a href> and its
         // visible text, then inject the .link attribute at those ranges.

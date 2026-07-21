@@ -16,7 +16,7 @@ import UIKit
 public class BreadPartnerDefaults: NSObject {
     public static let GRAY_COLOR: UIColor = .init(hex: "#767676")
     public static let LIGHT_GRAY_COLOR: UIColor = .init(hex: "#ececec")
-    public static var SUPERSCRIPT_TEXT_SCALE: CGFloat = 0.75
+    public static let SUPERSCRIPT_TEXT_SCALE: CGFloat = 0.75
     public static let TITLE_POPUP_TEXT_STYLE: PopupTextStyle = PopupTextStyle(
         font: UIFont(name: "Arial-BoldMT", size: 16.0),
         textColor: .black
