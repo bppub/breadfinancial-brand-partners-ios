@@ -97,7 +97,7 @@ public struct PopupTextStyle: @unchecked Sendable {
 
     public init(
         font: UIFont? = nil,
-        textColor: UIColor = BreadPartnerDefaults.GRAY_COLOR,
+        textColor: UIColor = BreadPartnerDefaults.GRAY_COLOR
     ) {
         self.font = font
         self.textColor = textColor
