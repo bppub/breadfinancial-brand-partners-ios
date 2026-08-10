@@ -42,6 +42,7 @@ internal class PopupController: UIViewController, AppRestartListener, UITextView
     var popupWidth: Double = 0.9
     var paddingHorizontalTen: Double = 10
     var paddingHorizontalTwenty: Double = 20
+    var disclosureTopPadding: Double = 24
     var paddingVerticalFive: Double = 5
     var paddingVerticalTen: Double = 10
     var paddingVerticalTwenty: Double = 20
