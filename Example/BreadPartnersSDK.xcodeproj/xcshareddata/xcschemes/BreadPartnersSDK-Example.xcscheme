@@ -65,10 +65,10 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "C337395E302FA5C500FB2A16"
+               BlueprintIdentifier = "C3F35C0D302FBC2C0025CBA0"
                BuildableName = "BreadPartnersSDK_UnitTests.xctest"
                BlueprintName = "BreadPartnersSDK_UnitTests"
-               ReferencedContainer = "container:Pods/Pods.xcodeproj">
+               ReferencedContainer = "container:BreadPartnersSDK.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>

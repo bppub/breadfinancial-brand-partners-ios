@@ -49,6 +49,9 @@ jobs:
             -maximum-parallel-testing-workers 4 \
             -enableCodeCoverage YES \
             -resultBundlePath UnitTestResults.xcresult
+            -quiet
+            
+
 
       - name: Read unit coverage metrics
         id: coverage
@@ -119,11 +122,11 @@ jobs:
         run: |
           xcodebuild test \
             -workspace Example/BreadPartnersSDK.xcworkspace \
-            -scheme BreadPartnersSDK-Example \
+            -scheme BreadPartnersSDK-UITests \
             -destination 'platform=iOS Simulator,name=iPhone 17' \
-            -only-testing:BreadPartnersSDK_UITests \
             -enableCodeCoverage YES \
             -resultBundlePath UITestResults.xcresult
+            -quite
 
       - name: Read UI coverage metrics
         id: coverage

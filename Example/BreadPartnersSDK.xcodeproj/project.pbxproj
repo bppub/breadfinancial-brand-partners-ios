@@ -14,29 +14,23 @@
 		12D9F1F32D53956800799C72 /* Poppins-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 12D9F1F12D53956800799C72 /* Poppins-Bold.otf */; };
 		4EBA47982F71846400FE0D88 /* Podfile.lock in Resources */ = {isa = PBXBuildFile; fileRef = 4EBA47952F71846400FE0D88 /* Podfile.lock */; };
 		4EBA47992F71846400FE0D88 /* Podfile in Resources */ = {isa = PBXBuildFile; fileRef = 4EBA47942F71846400FE0D88 /* Podfile */; };
-		556A8FBC89AAFD1C2A8C4DB0 /* Pods_BreadPartnersSDK_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C34814D8302FC574001BF68C /* Pods_BreadPartnersSDK_Example.framework */; };
 		607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
 		607FACD81AFB9204008FA782 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD71AFB9204008FA782 /* ViewController.swift */; };
 		607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 607FACD91AFB9204008FA782 /* Main.storyboard */; };
 		607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
 		9E683B79640311BC11F4D9B5 /* Pods_BreadPartnersSDK_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 536656BA262FB1F56BC7D6A2 /* Pods_BreadPartnersSDK_Example.framework */; };
+		C318D2BA302FCDB500E69DE6 /* BreadPartnersSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C318D2B9302FCDB500E69DE6 /* BreadPartnersSDK.framework */; };
+		DD3E50504CA1F8A0E546EE6E /* Pods_BreadPartnersSDK_UnitTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4AA024118819A8E7EE95CABF /* Pods_BreadPartnersSDK_UnitTests.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		C3373973302FA5FB00FB2A16 /* PBXContainerItemProxy */ = {
+		C318D2BB302FCDC300E69DE6 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 607FACC81AFB9204008FA782 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 607FACCF1AFB9204008FA782;
 			remoteInfo = BreadPartnersSDK_Example;
-		};
-		C3F35C2E302FBEBD0025CBA0 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 607FACC81AFB9204008FA782 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 607FACCF1AFB9204008FA782;
-			remoteInfo = BreadPartnersSDK_ExampleApp;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -62,15 +56,37 @@
 		6DCCD3FC8D36AE7CE77282F1 /* Pods-BreadPartnersSDK_UnitTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BreadPartnersSDK_UnitTests.release.xcconfig"; path = "Target Support Files/Pods-BreadPartnersSDK_UnitTests/Pods-BreadPartnersSDK_UnitTests.release.xcconfig"; sourceTree = "<group>"; };
 		9A17460150109AC2B569919E /* BreadPartnersSDK.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = BreadPartnersSDK.podspec; path = ../BreadPartnersSDK.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		AB54074BD23578AFCD7810E8 /* Pods-BreadPartnersSDK_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BreadPartnersSDK_Example.release.xcconfig"; path = "Target Support Files/Pods-BreadPartnersSDK_Example/Pods-BreadPartnersSDK_Example.release.xcconfig"; sourceTree = "<group>"; };
+		C318D2B9302FCDB500E69DE6 /* BreadPartnersSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = BreadPartnersSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C337396D302FA5FB00FB2A16 /* BreadPartnersSDK_UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BreadPartnersSDK_UITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C34814D8302FC574001BF68C /* Pods_BreadPartnersSDK_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Pods_BreadPartnersSDK_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C34814EE302FCC11001BF68C /* BreadPartnersSDK.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = BreadPartnersSDK.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3F35C0E302FBC2C0025CBA0 /* BreadPartnersSDK_UnitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BreadPartnersSDK_UnitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F35B791DCF3ECC94216B7478 /* Pods-BreadPartnersSDK_UnitTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BreadPartnersSDK_UnitTests.debug.xcconfig"; path = "Target Support Files/Pods-BreadPartnersSDK_UnitTests/Pods-BreadPartnersSDK_UnitTests.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		C337396E302FA5FB00FB2A16 /* BreadPartnersSDK_UiTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = BreadPartnersSDK_UiTests; sourceTree = "<group>"; };
-		C3F35C0F302FBC2C0025CBA0 /* BreadPartnersSDK_UnitTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = BreadPartnersSDK_UnitTests; sourceTree = "<group>"; };
+		C337396E302FA5FB00FB2A16 /* BreadPartnersSDK_UiTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = BreadPartnersSDK_UiTests;
+			sourceTree = "<group>";
+		};
+		C3F35C0F302FBC2C0025CBA0 /* BreadPartnersSDK_UnitTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = BreadPartnersSDK_UnitTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,7 +95,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				9E683B79640311BC11F4D9B5 /* Pods_BreadPartnersSDK_Example.framework in Frameworks */,
-				556A8FBC89AAFD1C2A8C4DB0 /* Pods_BreadPartnersSDK_Example.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -94,6 +109,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C318D2BA302FCDB500E69DE6 /* BreadPartnersSDK.framework in Frameworks */,
+				DD3E50504CA1F8A0E546EE6E /* Pods_BreadPartnersSDK_UnitTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -173,6 +190,8 @@
 		938CCAD9F1825E11C7A9D862 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				C318D2B9302FCDB500E69DE6 /* BreadPartnersSDK.framework */,
+				C34814EE302FCC11001BF68C /* BreadPartnersSDK.framework */,
 				536656BA262FB1F56BC7D6A2 /* Pods_BreadPartnersSDK_Example.framework */,
 				4AA024118819A8E7EE95CABF /* Pods_BreadPartnersSDK_UnitTests.framework */,
 			);
@@ -231,7 +250,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				C3373974302FA5FB00FB2A16 /* PBXTargetDependency */,
+				C318D2BC302FCDC300E69DE6 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				C337396E302FA5FB00FB2A16 /* BreadPartnersSDK_UiTests */,
@@ -253,7 +272,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				C3F35C2F302FBEBD0025CBA0 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				C3F35C0F302FBC2C0025CBA0 /* BreadPartnersSDK_UnitTests */,
@@ -302,8 +320,8 @@
 			projectRoot = "";
 			targets = (
 				607FACCF1AFB9204008FA782 /* BreadPartnersSDK_Example */,
-				C337396C302FA5FB00FB2A16 /* BreadPartnersSDK_UITests */,
 				C3F35C0D302FBC2C0025CBA0 /* BreadPartnersSDK_UnitTests */,
+				C337396C302FA5FB00FB2A16 /* BreadPartnersSDK_UITests */,
 			);
 		};
 /* End PBXProject section */
@@ -436,15 +454,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		C3373974302FA5FB00FB2A16 /* PBXTargetDependency */ = {
+		C318D2BC302FCDC300E69DE6 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 607FACCF1AFB9204008FA782 /* BreadPartnersSDK_Example */;
-			targetProxy = C3373973302FA5FB00FB2A16 /* PBXContainerItemProxy */;
-		};
-		C3F35C2F302FBEBD0025CBA0 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 607FACCF1AFB9204008FA782 /* BreadPartnersSDK_Example */;
-			targetProxy = C3F35C2E302FBEBD0025CBA0 /* PBXContainerItemProxy */;
+			targetProxy = C318D2BB302FCDC300E69DE6 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -647,7 +660,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = BreadPartnersSDK_ExampleApp;
+				TEST_TARGET_NAME = BreadPartnersSDK_Example;
 			};
 			name = Debug;
 		};
@@ -683,7 +696,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = BreadPartnersSDK_ExampleApp;
+				TEST_TARGET_NAME = BreadPartnersSDK_Example;
 			};
 			name = Release;
 		};
