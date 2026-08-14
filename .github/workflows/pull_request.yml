@@ -31,11 +31,39 @@ jobs:
             -enableCodeCoverage YES \
             -resultBundlePath TestResults.xcresult
 
-      - name: Read coverage percent
+      - name: Read coverage metrics
         id: coverage
         run: |
-          COVERAGE=$(xcrun xccov view --report --json TestResults.xcresult | python3 -c "import json,sys; print(f'{json.load(sys.stdin)[\"lineCoverage\"]*100:.2f}')")
-          echo "percent=$COVERAGE" >> "$GITHUB_OUTPUT"
+          xcrun xccov view --report --json TestResults.xcresult | python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          import sys
+
+          report = json.load(sys.stdin)
+          line_coverage = float(report.get("lineCoverage", 0.0)) * 100
+          covered_lines = int(report.get("coveredLines", 0))
+          executable_lines = int(report.get("executableLines", 0))
+          targets = report.get("targets", [])
+
+          print(f"percent={line_coverage:.2f}")
+          print(f"covered_lines={covered_lines}")
+          print(f"executable_lines={executable_lines}")
+          print(f"target_count={len(targets)}")
+          PY
+
+      - name: Publish coverage summary in Checks
+        run: |
+          {
+            echo "## Coverage"
+            echo
+            echo "| Metric | Value |"
+            echo "| --- | ---: |"
+            echo "| Line Coverage | **${{ steps.coverage.outputs.percent }}%** |"
+            echo "| Covered Lines | ${{ steps.coverage.outputs.covered_lines }} |"
+            echo "| Executable Lines | ${{ steps.coverage.outputs.executable_lines }} |"
+            echo "| Targets in Report | ${{ steps.coverage.outputs.target_count }} |"
+            echo
+            echo "Source: \\`TestResults.xcresult\\`"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Comment coverage on PR
         uses: actions/github-script@v7
