@@ -5,6 +5,10 @@ on:
     branches:
       - master
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   build:
     runs-on: macos-latest
@@ -23,4 +27,24 @@ jobs:
           xcodebuild test \
             -workspace Example/BreadPartnersSDK.xcworkspace \
             -scheme BreadPartnersSDK_Tests \
-            -destination 'platform=iOS Simulator,name=iPhone 17'
+            -destination 'platform=iOS Simulator,name=iPhone 17' \
+            -enableCodeCoverage YES \
+            -resultBundlePath TestResults.xcresult
+
+      - name: Read coverage percent
+        id: coverage
+        run: |
+          COVERAGE=$(xcrun xccov view --report --json TestResults.xcresult | python3 -c "import json,sys; print(f'{json.load(sys.stdin)[\"lineCoverage\"]*100:.2f}')")
+          echo "percent=$COVERAGE" >> "$GITHUB_OUTPUT"
+
+      - name: Comment coverage on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = `### Coverage\n\nLine coverage: **${{ steps.coverage.outputs.percent }}%**`;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body
+            });
