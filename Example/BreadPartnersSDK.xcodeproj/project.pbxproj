@@ -29,6 +29,7 @@
 		607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
 		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
 		9E683B79640311BC11F4D9B5 /* Pods_BreadPartnersSDK_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 536656BA262FB1F56BC7D6A2 /* Pods_BreadPartnersSDK_Example.framework */; };
+		C337395A302F872F00FB2A16 /* SwiftTestingStarterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3373959302F872F00FB2A16 /* SwiftTestingStarterTests.swift */; };
 		C37355C45A782A5282840B43 /* Pods_BreadPartnersSDK_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 651C4B8ED59CB7F845082BB7 /* Pods_BreadPartnersSDK_Tests.framework */; };
 /* End PBXBuildFile section */
 
@@ -70,6 +71,7 @@
 		651C4B8ED59CB7F845082BB7 /* Pods_BreadPartnersSDK_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BreadPartnersSDK_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9A17460150109AC2B569919E /* BreadPartnersSDK.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = BreadPartnersSDK.podspec; path = ../BreadPartnersSDK.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		AB54074BD23578AFCD7810E8 /* Pods-BreadPartnersSDK_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BreadPartnersSDK_Example.release.xcconfig"; path = "Target Support Files/Pods-BreadPartnersSDK_Example/Pods-BreadPartnersSDK_Example.release.xcconfig"; sourceTree = "<group>"; };
+		C3373959302F872F00FB2A16 /* SwiftTestingStarterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftTestingStarterTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -106,6 +108,7 @@
 			isa = PBXGroup;
 			children = (
 				4E173DC83006974400B394B5 /* Models */,
+				C3373959302F872F00FB2A16 /* SwiftTestingStarterTests.swift */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -413,6 +416,7 @@
 				4ED6382C3006B077005BB3DE /* OfferResponseTest.swift in Sources */,
 				4ED638313007E663005BB3DE /* UnifiedPrequalTest.swift in Sources */,
 				4ED6382D3006B077005BB3DE /* BreadPartnersEnvironmentTest.swift in Sources */,
+				C337395A302F872F00FB2A16 /* SwiftTestingStarterTests.swift in Sources */,
 				12396DF72D88379000806D59 /* RTPSController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
