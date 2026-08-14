@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "263AE1ED-3A99-4D10-9901-F425132DC9C7",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:BreadPartnersSDK.xcodeproj",
+        "identifier" : "C337396C302FA5FB00FB2A16",
+        "name" : "BreadPartnersSDK_UITests"
+      }
+    }
+  ],
+  "version" : 1
+}

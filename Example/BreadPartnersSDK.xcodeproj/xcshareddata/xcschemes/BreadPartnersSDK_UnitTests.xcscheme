@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "2650"
+   LastUpgradeVersion = "2660"
    version = "1.7">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -11,16 +11,22 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
-      shouldUseLaunchSchemeArgsEnv = "YES"
-      shouldAutocreateTestPlan = "YES">
+      shouldUseLaunchSchemeArgsEnv = "YES">
+      <TestPlans>
+         <TestPlanReference
+            reference = "container:../BreadPartnersSDK_UnitTests.xctestplan"
+            default = "YES">
+         </TestPlanReference>
+      </TestPlans>
       <Testables>
          <TestableReference
-            skipped = "NO">
+            skipped = "NO"
+            parallelizable = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "607FACE41AFB9204008FA782"
-               BuildableName = "BreadPartnersSDK_Tests.xctest"
-               BlueprintName = "BreadPartnersSDK_Tests"
+               BlueprintIdentifier = "C3F35C0D302FBC2C0025CBA0"
+               BuildableName = "BreadPartnersSDK_UnitTests.xctest"
+               BlueprintName = "BreadPartnersSDK_UnitTests"
                ReferencedContainer = "container:BreadPartnersSDK.xcodeproj">
             </BuildableReference>
          </TestableReference>

@@ -58,7 +58,7 @@ struct UnifiedPrequalPathResultTests {
         // Key exists but its value is nil.
         #expect(result.queryParams.keys.contains("optional"))
         #expect(result.queryParams["optional"]! == nil)
-        #expect(result.queryParams["present"] as? String == "value")
+        #expect(result.queryParams["present"] as? String == "somethingWrong")
     }
 }
 

@@ -7,7 +7,7 @@ use_frameworks! :linkage => :static
 target 'BreadPartnersSDK_Example' do
   pod 'BreadPartnersSDK', :path => '../'
 
-  target 'BreadPartnersSDK_Tests' do
+  target 'BreadPartnersSDK_UnitTests' do
     inherit! :search_paths
 
     pod 'Quick', '~> 2.2.0'

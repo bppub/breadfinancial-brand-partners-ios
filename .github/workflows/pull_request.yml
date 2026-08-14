@@ -14,8 +14,14 @@ permissions:
   checks: write
 
 jobs:
-  build:
+  unit_tests:
     runs-on: macos-latest
+    outputs:
+      percent: ${{ steps.coverage.outputs.percent }}
+      covered_lines: ${{ steps.coverage.outputs.covered_lines }}
+      executable_lines: ${{ steps.coverage.outputs.executable_lines }}
+      target_count: ${{ steps.coverage.outputs.target_count }}
+      targets_json: ${{ steps.coverage.outputs.targets_json }}
     steps:
       - uses: actions/checkout@v3
 
@@ -39,19 +45,20 @@ jobs:
             -workspace Example/BreadPartnersSDK.xcworkspace \
             -scheme BreadPartnersSDK_Tests \
             -destination 'platform=iOS Simulator,name=iPhone 17' \
+            -parallel-testing-enabled YES \
+            -maximum-parallel-testing-workers 4 \
             -enableCodeCoverage YES \
-            -resultBundlePath TestResults.xcresult
+            -resultBundlePath UnitTestResults.xcresult
 
-      - name: Read coverage metrics
+      - name: Read unit coverage metrics
         id: coverage
         run: |
           python3 - <<'PY' >> "$GITHUB_OUTPUT"
           import json
           import subprocess
-          import sys
 
           raw = subprocess.check_output(
-              ["xcrun", "xccov", "view", "--report", "--json", "TestResults.xcresult"],
+              ["xcrun", "xccov", "view", "--report", "--json", "UnitTestResults.xcresult"],
               text=True,
           ).strip()
 
@@ -82,21 +89,129 @@ jobs:
           print(f"targets_json={json.dumps(target_rows, separators=(',', ':'))}")
           PY
 
-      - name: Publish coverage check run
+  ui_tests:
+    runs-on: macos-latest
+    needs: unit_tests
+    outputs:
+      percent: ${{ steps.coverage.outputs.percent }}
+      covered_lines: ${{ steps.coverage.outputs.covered_lines }}
+      executable_lines: ${{ steps.coverage.outputs.executable_lines }}
+      target_count: ${{ steps.coverage.outputs.target_count }}
+      targets_json: ${{ steps.coverage.outputs.targets_json }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: |
+            Example/Pods
+            ~/.cocoapods
+            ~/Library/Caches/CocoaPods
+          key: ${{ runner.os }}-pods-${{ hashFiles('Example/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
+      - name: Install pods
+        run: pod install --project-directory=Example
+
+      - name: Run UI Tests
+        run: |
+          xcodebuild test \
+            -workspace Example/BreadPartnersSDK.xcworkspace \
+            -scheme BreadPartnersSDK-Example \
+            -destination 'platform=iOS Simulator,name=iPhone 17' \
+            -only-testing:BreadPartnersSDK_UITests \
+            -enableCodeCoverage YES \
+            -resultBundlePath UITestResults.xcresult
+
+      - name: Read UI coverage metrics
+        id: coverage
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          import subprocess
+
+          raw = subprocess.check_output(
+              ["xcrun", "xccov", "view", "--report", "--json", "UITestResults.xcresult"],
+              text=True,
+          ).strip()
+
+          if not raw:
+              raise SystemExit("xccov produced empty output")
+
+          report = json.loads(raw)
+          line_coverage = float(report.get("lineCoverage", 0.0)) * 100
+          covered_lines = int(report.get("coveredLines", 0))
+          executable_lines = int(report.get("executableLines", 0))
+          targets = report.get("targets", [])
+
+          target_rows = []
+          for t in targets:
+              target_rows.append({
+                  "name": str(t.get("name", "unknown")),
+                  "line_coverage": round(float(t.get("lineCoverage", 0.0)) * 100, 2),
+                  "covered_lines": int(t.get("coveredLines", 0)),
+                  "executable_lines": int(t.get("executableLines", 0)),
+              })
+
+          target_rows.sort(key=lambda x: x["line_coverage"])
+
+          print(f"percent={line_coverage:.2f}")
+          print(f"covered_lines={covered_lines}")
+          print(f"executable_lines={executable_lines}")
+          print(f"target_count={len(targets)}")
+          print(f"targets_json={json.dumps(target_rows, separators=(',', ':'))}")
+          PY
+
+  combined_coverage:
+    runs-on: macos-latest
+    needs:
+      - unit_tests
+      - ui_tests
+    steps:
+      - name: Publish combined coverage check run
         uses: actions/github-script@v7
         env:
-          COVERAGE_PERCENT: ${{ steps.coverage.outputs.percent }}
-          COVERED_LINES: ${{ steps.coverage.outputs.covered_lines }}
-          EXECUTABLE_LINES: ${{ steps.coverage.outputs.executable_lines }}
-          TARGET_COUNT: ${{ steps.coverage.outputs.target_count }}
-          TARGETS_JSON: ${{ steps.coverage.outputs.targets_json }}
+          UNIT_COVERED_LINES: ${{ needs.unit_tests.outputs.covered_lines }}
+          UNIT_EXECUTABLE_LINES: ${{ needs.unit_tests.outputs.executable_lines }}
+          UNIT_TARGETS_JSON: ${{ needs.unit_tests.outputs.targets_json }}
+          UI_COVERED_LINES: ${{ needs.ui_tests.outputs.covered_lines }}
+          UI_EXECUTABLE_LINES: ${{ needs.ui_tests.outputs.executable_lines }}
+          UI_TARGETS_JSON: ${{ needs.ui_tests.outputs.targets_json }}
         with:
           script: |
-            const percent = process.env.COVERAGE_PERCENT;
-            const covered = process.env.COVERED_LINES;
-            const executable = process.env.EXECUTABLE_LINES;
-            const targetCount = process.env.TARGET_COUNT;
-            const targets = JSON.parse(process.env.TARGETS_JSON || "[]");
+            const unitCovered = Number(process.env.UNIT_COVERED_LINES || 0);
+            const unitExecutable = Number(process.env.UNIT_EXECUTABLE_LINES || 0);
+            const uiCovered = Number(process.env.UI_COVERED_LINES || 0);
+            const uiExecutable = Number(process.env.UI_EXECUTABLE_LINES || 0);
+
+            const covered = unitCovered + uiCovered;
+            const executable = unitExecutable + uiExecutable;
+            const percent = executable > 0 ? ((covered / executable) * 100).toFixed(2) : "0.00";
+
+            const combinedTargetsByName = new Map();
+            const allTargets = [
+              ...JSON.parse(process.env.UNIT_TARGETS_JSON || "[]"),
+              ...JSON.parse(process.env.UI_TARGETS_JSON || "[]")
+            ];
+
+            for (const t of allTargets) {
+              const name = String(t.name || "unknown");
+              const coveredLines = Number(t.covered_lines || 0);
+              const executableLines = Number(t.executable_lines || 0);
+              const prev = combinedTargetsByName.get(name) || { name, covered_lines: 0, executable_lines: 0 };
+              prev.covered_lines += coveredLines;
+              prev.executable_lines += executableLines;
+              combinedTargetsByName.set(name, prev);
+            }
+
+            const targets = Array.from(combinedTargetsByName.values()).map(t => ({
+              ...t,
+              line_coverage: t.executable_lines > 0 ? (t.covered_lines / t.executable_lines) * 100 : 0
+            }));
+            targets.sort((a, b) => a.line_coverage - b.line_coverage);
+            const targetCount = targets.length;
 
             const topLowCoverage = targets.slice(0, 8);
             const targetTable = topLowCoverage.length === 0
@@ -116,18 +231,19 @@ jobs:
               `| Covered Lines | ${covered} |`,
               `| Executable Lines | ${executable} |`,
               `| Targets in Report | ${targetCount} |`,
+              "| Test Runs Combined | Unit + UI |",
               `| Workflow Run | ${context.runId} |`,
               `| Commit | ${context.sha.slice(0, 7)} |`,
               "",
               targetTable,
               "",
-              "Source: `TestResults.xcresult`"
+              "Source: `UnitTestResults.xcresult` + `UITestResults.xcresult`"
             ].join("\n");
 
             await github.rest.checks.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              name: "Coverage",
+              name: "Coverage (Combined)",
               head_sha: context.payload.pull_request.head.sha,
               status: "completed",
               conclusion: "success",

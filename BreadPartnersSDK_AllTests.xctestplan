@@ -1,0 +1,31 @@
+{
+  "configurations" : [
+    {
+      "id" : "F3BB7FE0-0DD1-48FA-B15B-3F7D71507B71",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:BreadPartnersSDK.xcodeproj",
+        "identifier" : "C337396C302FA5FB00FB2A16",
+        "name" : "BreadPartnersSDK_UITests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:BreadPartnersSDK.xcodeproj",
+        "identifier" : "C3F35C0D302FBC2C0025CBA0",
+        "name" : "BreadPartnersSDK_UnitTests"
+      }
+    }
+  ],
+  "version" : 1
+}
