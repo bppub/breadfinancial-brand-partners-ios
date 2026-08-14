@@ -5,6 +5,10 @@ on:
     branches:
       - master
 
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}-unit-tests
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -14,9 +18,16 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install Xcode
-        run: |
-          sudo xcode-select --install || true
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: |
+            Example/Pods
+            ~/.cocoapods
+            ~/Library/Caches/CocoaPods
+          key: ${{ runner.os }}-pods-${{ hashFiles('Example/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
 
       - name: Install pods
         run: pod install --project-directory=Example
@@ -70,5 +81,5 @@ jobs:
             echo "| Executable Lines | ${{ steps.coverage.outputs.executable_lines }} |"
             echo "| Targets in Report | ${{ steps.coverage.outputs.target_count }} |"
             echo
-            echo "Source: \\`TestResults.xcresult\\`"
+            echo 'Source: `TestResults.xcresult`'
           } >> "$GITHUB_STEP_SUMMARY"
