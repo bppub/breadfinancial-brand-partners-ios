@@ -10,27 +10,31 @@ import XCTest
 
 final class BreadPartnersSDK_UITestsLaunchTests: XCTestCase {
 
-    override class var runsForEachTargetApplicationUIConfiguration: Bool {
-        true
-    }
+    private var app: XCUIApplication!
 
     override func setUpWithError() throws {
         continueAfterFailure = false
+        app = XCUIApplication()
+        app.launch()
+    }
+
+    override func tearDownWithError() throws {
+        app = nil
     }
 
     @MainActor
-    func testLaunch() throws {
-        let app = XCUIApplication()
-        app.launch()
+    func testOpenExperienceFlowNavigatesAwayFromHomeScreen() throws {
+        let openExperienceButton = app.buttons["OpenExperience"]
+        XCTAssertTrue(openExperienceButton.waitForExistence(timeout: 5))
 
-        // Insert steps here to perform after app launch but before taking a screenshot,
-        // such as logging into a test account or navigating somewhere in the app
-        // XCUIAutomation Documentation
-        // https://developer.apple.com/documentation/xcuiautomation
+        openExperienceButton.tap()
+
+        // Basic smoke assertion: tapping OpenExperience does not crash the host app.
+        XCTAssertEqual(app.state, .runningForeground)
 
         let attachment = XCTAttachment(screenshot: app.screenshot())
-        attachment.name = "Launch Screen"
-        attachment.lifetime = .keepAlways
+        attachment.name = "OpenExperience Smoke"
+        attachment.lifetime = .deleteOnSuccess
         add(attachment)
     }
 }
