@@ -11,6 +11,7 @@ concurrency:
 
 permissions:
   contents: read
+  checks: write
 
 jobs:
   build:
@@ -63,23 +64,76 @@ jobs:
           executable_lines = int(report.get("executableLines", 0))
           targets = report.get("targets", [])
 
+          target_rows = []
+          for t in targets:
+              target_rows.append({
+                  "name": str(t.get("name", "unknown")),
+                  "line_coverage": round(float(t.get("lineCoverage", 0.0)) * 100, 2),
+                  "covered_lines": int(t.get("coveredLines", 0)),
+                  "executable_lines": int(t.get("executableLines", 0)),
+              })
+
+          target_rows.sort(key=lambda x: x["line_coverage"])
+
           print(f"percent={line_coverage:.2f}")
           print(f"covered_lines={covered_lines}")
           print(f"executable_lines={executable_lines}")
           print(f"target_count={len(targets)}")
+          print(f"targets_json={json.dumps(target_rows, separators=(',', ':'))}")
           PY
 
-      - name: Publish coverage summary in Checks
-        run: |
-          {
-            echo "## Coverage"
-            echo
-            echo "| Metric | Value |"
-            echo "| --- | ---: |"
-            echo "| Line Coverage | **${{ steps.coverage.outputs.percent }}%** |"
-            echo "| Covered Lines | ${{ steps.coverage.outputs.covered_lines }} |"
-            echo "| Executable Lines | ${{ steps.coverage.outputs.executable_lines }} |"
-            echo "| Targets in Report | ${{ steps.coverage.outputs.target_count }} |"
-            echo
-            echo 'Source: `TestResults.xcresult`'
-          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Publish coverage check run
+        uses: actions/github-script@v7
+        env:
+          COVERAGE_PERCENT: ${{ steps.coverage.outputs.percent }}
+          COVERED_LINES: ${{ steps.coverage.outputs.covered_lines }}
+          EXECUTABLE_LINES: ${{ steps.coverage.outputs.executable_lines }}
+          TARGET_COUNT: ${{ steps.coverage.outputs.target_count }}
+          TARGETS_JSON: ${{ steps.coverage.outputs.targets_json }}
+        with:
+          script: |
+            const percent = process.env.COVERAGE_PERCENT;
+            const covered = process.env.COVERED_LINES;
+            const executable = process.env.EXECUTABLE_LINES;
+            const targetCount = process.env.TARGET_COUNT;
+            const targets = JSON.parse(process.env.TARGETS_JSON || "[]");
+
+            const topLowCoverage = targets.slice(0, 8);
+            const targetTable = topLowCoverage.length === 0
+              ? "No target-level coverage details were returned."
+              : [
+                  "### Lowest Coverage Targets",
+                  "| Target | Coverage | Covered / Executable |",
+                  "| --- | ---: | ---: |",
+                  ...topLowCoverage.map(t => `| ${t.name} | ${t.line_coverage.toFixed(2)}% | ${t.covered_lines} / ${t.executable_lines} |`)
+                ].join("\n");
+
+            const summary = `Line coverage: **${percent}%**`;
+            const text = [
+              "| Metric | Value |",
+              "| --- | ---: |",
+              `| Line Coverage | **${percent}%** |`,
+              `| Covered Lines | ${covered} |`,
+              `| Executable Lines | ${executable} |`,
+              `| Targets in Report | ${targetCount} |`,
+              `| Workflow Run | ${context.runId} |`,
+              `| Commit | ${context.sha.slice(0, 7)} |`,
+              "",
+              targetTable,
+              "",
+              "Source: `TestResults.xcresult`"
+            ].join("\n");
+
+            await github.rest.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: "Coverage",
+              head_sha: context.payload.pull_request.head.sha,
+              status: "completed",
+              conclusion: "success",
+              output: {
+                title: "Coverage",
+                summary,
+                text
+              }
+            });
