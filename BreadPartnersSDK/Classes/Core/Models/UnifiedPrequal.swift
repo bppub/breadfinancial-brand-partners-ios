@@ -1,9 +1,14 @@
+//------------------------------------------------------------------------------
+//  File:          UnifiedPrequal.swift
+//  Author(s):     Bread Financial
+//  Date:          27 March 2025
 //
-//  UnifiedPrequal.swift
-//  Pods
+//  Descriptions:  This file is part of the BreadPartnersSDK for iOS,
+//  providing UI components and functionalities to integrate Bread Financial
+//  services into partner applications.
 //
-//  Created by Joncarlos Tavarez on 5/13/26.
-//
+//  © 2026 Bread Financial
+//------------------------------------------------------------------------------
 
 
 /// Represents the result of unified prequalification path generation
