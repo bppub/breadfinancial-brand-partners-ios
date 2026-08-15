@@ -59,6 +59,9 @@ jobs:
           script: |
             const { execSync } = require("node:child_process");
 
+            const escapeCell = (value) => String(value ?? "").replace(/\|/g, "\\|");
+            const toNum = (value) => Number(value || 0);
+
             const readReport = (path) => {
               const raw = execSync(`xcrun xccov view --report --json ${path}`, { encoding: "utf8" }).trim();
               if (!raw) throw new Error(`xccov produced empty output for ${path}`);
@@ -68,15 +71,6 @@ jobs:
             const unit = readReport("UnitTestResults.xcresult");
             const ui = readReport("UITestResults.xcresult");
 
-            const unitCovered = Number(unit.coveredLines || 0);
-            const unitExecutable = Number(unit.executableLines || 0);
-            const uiCovered = Number(ui.coveredLines || 0);
-            const uiExecutable = Number(ui.executableLines || 0);
-
-            const covered = unitCovered + uiCovered;
-            const executable = unitExecutable + uiExecutable;
-            const percent = executable > 0 ? ((covered / executable) * 100).toFixed(2) : "0.00";
-
             const combinedTargetsByName = new Map();
             const allTargets = [
               ...(unit.targets || []),
@@ -85,29 +79,80 @@ jobs:
 
             for (const t of allTargets) {
               const name = String(t.name || "unknown");
-              const coveredLines = Number(t.coveredLines || 0);
-              const executableLines = Number(t.executableLines || 0);
+              const coveredLines = toNum(t.coveredLines);
+              const executableLines = toNum(t.executableLines);
               const prev = combinedTargetsByName.get(name) || { name, covered_lines: 0, executable_lines: 0 };
               prev.covered_lines += coveredLines;
               prev.executable_lines += executableLines;
               combinedTargetsByName.set(name, prev);
             }
 
-            const targets = Array.from(combinedTargetsByName.values()).map(t => ({
-              ...t,
-              line_coverage: t.executable_lines > 0 ? (t.covered_lines / t.executable_lines) * 100 : 0
-            }));
+            const targets = Array.from(combinedTargetsByName.values())
+              .filter(t => t.executable_lines > 0)
+              .map(t => ({
+                ...t,
+                line_coverage: (t.covered_lines / t.executable_lines) * 100,
+              }));
+
+            const covered = targets.reduce((sum, t) => sum + t.covered_lines, 0);
+            const executable = targets.reduce((sum, t) => sum + t.executable_lines, 0);
+            const percent = executable > 0 ? ((covered / executable) * 100).toFixed(2) : "0.00";
+
             targets.sort((a, b) => a.line_coverage - b.line_coverage);
             const targetCount = targets.length;
 
-            const topLowCoverage = targets.slice(0, 8);
+            const topLowCoverage = targets.slice(0, 12);
             const targetTable = topLowCoverage.length === 0
               ? "No target-level coverage details were returned."
               : [
                   "### Lowest Coverage Targets",
                   "| Target | Coverage | Covered / Executable |",
                   "| --- | ---: | ---: |",
-                  ...topLowCoverage.map(t => `| ${t.name} | ${t.line_coverage.toFixed(2)}% | ${t.covered_lines} / ${t.executable_lines} |`)
+                  ...topLowCoverage.map(t => `| ${escapeCell(t.name)} | ${t.line_coverage.toFixed(2)}% | ${t.covered_lines} / ${t.executable_lines} |`)
+                ].join("\n");
+
+            // Build file-level coverage to help prioritize next work.
+            const filesByPath = new Map();
+            for (const t of allTargets) {
+              const targetName = String(t.name || "unknown");
+              const files = Array.isArray(t.files) ? t.files : [];
+              for (const f of files) {
+                const path = String(f.path || f.name || "unknown");
+                const coveredLines = toNum(f.coveredLines);
+                const executableLines = toNum(f.executableLines);
+                const prev = filesByPath.get(path) || {
+                  path,
+                  covered_lines: 0,
+                  executable_lines: 0,
+                  targets: new Set(),
+                };
+                prev.covered_lines += coveredLines;
+                prev.executable_lines += executableLines;
+                prev.targets.add(targetName);
+                filesByPath.set(path, prev);
+              }
+            }
+
+            const files = Array.from(filesByPath.values())
+              .filter(f => f.executable_lines > 0)
+              .filter(f => !f.path.includes("/Pods/") && !f.path.startsWith("Pods/"))
+              .map(f => ({
+                path: f.path,
+                covered_lines: f.covered_lines,
+                executable_lines: f.executable_lines,
+                line_coverage: (f.covered_lines / f.executable_lines) * 100,
+                targets: Array.from(f.targets).sort(),
+              }))
+              .sort((a, b) => a.line_coverage - b.line_coverage);
+
+            const lowestFiles = files.slice(0, 20);
+            const fileTable = lowestFiles.length === 0
+              ? "No file-level coverage details were returned."
+              : [
+                  "### Lowest Coverage Files (Non-Pods)",
+                  "| File | Coverage | Covered / Executable | Target(s) |",
+                  "| --- | ---: | ---: | --- |",
+                  ...lowestFiles.map(f => `| ${escapeCell(f.path)} | ${f.line_coverage.toFixed(2)}% | ${f.covered_lines} / ${f.executable_lines} | ${escapeCell(f.targets.join(", "))} |`)
                 ].join("\n");
 
             const summary = `Line coverage: **${percent}%**`;
@@ -118,11 +163,14 @@ jobs:
               `| Covered Lines | ${covered} |`,
               `| Executable Lines | ${executable} |`,
               `| Targets in Report | ${targetCount} |`,
+              `| Files in Report (Non-Pods, executable > 0) | ${files.length} |`,
               "| Test Runs Combined | Unit + UI |",
               `| Workflow Run | ${context.runId} |`,
               `| Commit | ${context.sha.slice(0, 7)} |`,
               "",
               targetTable,
+              "",
+              fileTable,
               "",
               "Source: `UnitTestResults.xcresult` + `UITestResults.xcresult`"
             ].join("\n");

@@ -9,7 +9,25 @@
     }
   ],
   "defaultOptions" : {
-
+    "codeCoverage" : {
+      "targets" : [
+        {
+          "containerPath" : "container:BreadPartnersSDK.xcodeproj",
+          "identifier" : "607FACCF1AFB9204008FA782",
+          "name" : "BreadPartnersSDK_Example"
+        },
+        {
+          "containerPath" : "container:Pods\/Pods.xcodeproj",
+          "identifier" : "27970F3D71B0272D6A8B7C6FEFCAE84F",
+          "name" : "BreadPartnersSDK"
+        },
+        {
+          "containerPath" : "container:Pods\/Pods.xcodeproj",
+          "identifier" : "D201C4DEC6EA7A5526D26A9E52EE48F5",
+          "name" : "BreadPartnersSDK-BreadPartnersSDKResources"
+        }
+      ]
+    }
   },
   "testTargets" : [
     {
