@@ -380,12 +380,12 @@
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-BreadPartnersSDK_Example/Pods-BreadPartnersSDK_Example-resources.sh",
 				"${PODS_CONFIGURATION_BUILD_DIR}/BreadPartnersSDK/BreadPartnersSDKResources.bundle",
-				"${PODS_CONFIGURATION_BUILD_DIR}/RecaptchaEnterprise/RecaptchaEnterpriseResources.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/RecaptchaEnterpriseSDK/RecaptchaEnterpriseSDKResources.bundle",
 			);
 			name = "[CP] Copy Pods Resources";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/BreadPartnersSDKResources.bundle",
-				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RecaptchaEnterpriseResources.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RecaptchaEnterpriseSDKResources.bundle",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;

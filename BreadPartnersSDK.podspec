@@ -28,7 +28,7 @@ TODO: Add long description of the pod here.
   s.source           = { :git => 'https://github.com/SHUBHAM SINGHAL/BreadPartnersSDK.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
-  s.ios.deployment_target = '13.0'
+  s.ios.deployment_target = '15.0'
 
   s.source_files = 'BreadPartnersSDK/Classes/**/*'
   
@@ -42,6 +42,6 @@ TODO: Add long description of the pod here.
   
   # Dependencies
   s.dependency 'SwiftSoup', '~> 2.7.5'
-  s.dependency 'RecaptchaEnterprise', '18.6.0'
-  s.dependency 'RecaptchaInterop', '~> 100.0.0'
+  s.dependency 'RecaptchaEnterprise', '18.9.1'
+  s.dependency 'RecaptchaInterop', '~> 101.0.0'
 end
