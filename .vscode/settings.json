@@ -3,6 +3,7 @@
         "xcodebuild": true,
         "xcrun": true,
         "awk": true,
-        "printf": true
+        "printf": true,
+        "strings": true
     }
 }
