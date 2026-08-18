@@ -4,6 +4,7 @@
         "xcrun": true,
         "awk": true,
         "printf": true,
-        "strings": true
+        "strings": true,
+        "true": true
     }
 }
