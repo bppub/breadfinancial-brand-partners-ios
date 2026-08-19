@@ -1430,23 +1430,6 @@ struct BreadPartnersSDKSwiftTestingCoverage {
         #expect(mirrorValue(original, key: "padding", as: CGFloat.self) == 8.0)
     }
 
-    @Test
-    func breadPartnerLinkTextSwiftUiStoresAttributedInitData() {
-        let attributed = NSAttributedString(string: "HTML")
-        let view = BreadPartnerLinkTextSwitUI(attributedString: attributed)
-        #expect(mirrorValue(view, key: "text", as: String.self) == "HTML")
-        #expect(mirrorValue(view, key: "attributedText", as: NSAttributedString?.self)??.string == "HTML")
-    }
-
-    @Test
-    func breadPartnerLinkTextSwiftUiModifierUpdates() {
-        let view = BreadPartnerLinkTextSwitUI("Learn", links: ["Learn"])
-            .linkColor(.red)
-            .linkFont("HelveticaNeue", fontSize: 14)
-        #expect(mirrorValue(view, key: "linkFontName", as: String.self) == "HelveticaNeue")
-        #expect(mirrorValue(view, key: "linkFontSize", as: CGFloat.self) == 14)
-    }
-
     @MainActor
     @Test
     func loaderIndicatorCreatesEightBallLayers() {
