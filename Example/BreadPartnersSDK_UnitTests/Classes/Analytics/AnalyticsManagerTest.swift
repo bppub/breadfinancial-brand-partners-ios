@@ -57,11 +57,14 @@ struct AnalyticsManagerTests {
 		let manager = AnalyticsManager(logger: Logger())
 		manager.setApiKey("analytics-key")
 
-		await TestNetworkCoordinator.shared.withRequest {
+		let request = await TestNetworkCoordinator.shared.withRequest {
 			await manager.sendViewPlacement(placementResponse: response)
 		}
 
-		#expect(mirrorValue(manager, key: "apiKey") == "analytics-key")
+		expectAnalyticsRequest(
+			request,
+			path: "/ep/v1/view-placement"
+		)
 	}
 
 	@Test("sendClickPlacement sends a click payload to the click endpoint")
@@ -69,11 +72,14 @@ struct AnalyticsManagerTests {
 		let response = try makePlacementResponse()
 		let manager = AnalyticsManager(logger: Logger())
 
-		await TestNetworkCoordinator.shared.withRequest {
+		let request = await TestNetworkCoordinator.shared.withRequest {
 			await manager.sendClickPlacement(placementResponse: response)
 		}
 
-		#expect(mirrorValue(manager, key: "apiKey") == "")
+		expectAnalyticsRequest(
+			request,
+			path: "/ep/v1/click-placement"
+		)
 	}
 
 	@Test("analytics methods tolerate an empty placement response")
@@ -83,12 +89,45 @@ struct AnalyticsManagerTests {
 			from: Data("{}".utf8)
 		)
 		let manager = AnalyticsManager(logger: Logger())
+		manager.setApiKey("analytics-key")
 
-		await TestNetworkCoordinator.shared.withRequest {
+		let request = await TestNetworkCoordinator.shared.withRequest {
 			await manager.sendViewPlacement(placementResponse: emptyResponse)
 		}
 
-		#expect(mirrorValue(manager, key: "apiKey") == "")
+		expectAnalyticsRequest(
+			request,
+			path: "/ep/v1/view-placement"
+		)
+	}
+
+	@Test("analytics requests ignore API failures")
+	func analyticsRequestsIgnoreAPIFailures() async throws {
+		let response = try makePlacementResponse()
+		let manager = AnalyticsManager(logger: Logger())
+
+		await TestNetworkCoordinator.shared.withResponse(
+			data: Data("{\"message\":\"unavailable\"}".utf8),
+			statusCode: 503
+		) {
+			await manager.sendViewPlacement(placementResponse: response)
+		}
+	}
+
+	private func expectAnalyticsRequest(
+		_ request: URLRequest?,
+		path: String
+	) {
+		guard let request else {
+			Issue.record("Expected an intercepted analytics request")
+			return
+		}
+
+		#expect(request.httpMethod == "OPTIONS")
+		#expect(request.url?.path == path)
+		#expect(request.value(forHTTPHeaderField: Constants.headerAuthorityKey) == Constants.headerAuthorityValue)
+		#expect(request.value(forHTTPHeaderField: Constants.headerAcceptKey) == Constants.headerAcceptValue)
+		#expect(request.value(forHTTPHeaderField: Constants.headerAccessControlRequestMethodKey) == Constants.headerAccessControlRequestMethodValue)
 	}
 
 	private func mirrorValue<T>(_ object: Any, key: String) -> T? {

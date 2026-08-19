@@ -49,12 +49,14 @@ actor TestNetworkCoordinator {
         release()
     }
 
-    func withRequest(operation: () async -> Void) async {
+    func withRequest(operation: () async -> Void) async -> URLRequest? {
         await acquire()
         SharedTestURLProtocol.capturedRequest = nil
         registerIfNeeded()
         await operation()
+        let capturedRequest = SharedTestURLProtocol.capturedRequest
         release()
+        return capturedRequest
     }
 
     private func acquire() async {
