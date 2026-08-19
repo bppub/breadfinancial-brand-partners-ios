@@ -1,7 +1,9 @@
 import Testing
 import UIKit
+import WebKit
 @testable import BreadPartnersSDK
 
+@Suite(.serialized)
 struct PopupControllerTests {
 
     @Test("PopupController initializer stores all supplied configuration")
@@ -194,7 +196,7 @@ struct PopupControllerTests {
         popupModel.webViewUrl = "https://example.com/experience"
         prepareForEmbeddedOverlay(controller)
 
-        controller.displayEmbeddedOverlay(popupModel)
+        controller.displayEmbeddedOverlay(popupModel: popupModel)
 
         #expect(!controller.overlayProductView.isHidden)
         #expect(!controller.overlayEmbeddedView.isHidden)
@@ -236,16 +238,49 @@ struct PopupControllerTests {
     func displayEmbeddedOverlayPreservesWebViewForInvalidURL() {
         let controller = makeController { _ in }
         var popupModel = controller.popupModel
-        popupModel.webViewUrl = "not a valid URL"
-        popupModel.brandLogoUrl = "not a valid URL"
+        popupModel.webViewUrl = ""
+        popupModel.brandLogoUrl = ""
         prepareForEmbeddedOverlay(controller)
 
         let existingWebView = WKWebView()
         controller.webView = existingWebView
+        controller.overlayEmbeddedView.addSubview(existingWebView)
 
         controller.displayEmbeddedOverlay(popupModel: popupModel)
 
         #expect(controller.webView === existingWebView)
+    }
+
+    @Test("Replaces and removes the existing web view on app restart")
+    @MainActor
+    func onAppRestartClickedReplacesExistingWebView() {
+        let controller = makeController { _ in }
+        prepareForAppRestart(controller)
+
+        let oldWebView = WKWebView()
+        controller.webView = oldWebView
+        controller.overlayEmbeddedView.addSubview(oldWebView)
+
+        controller.onAppRestartClicked(url: "https://example.com/restarted")
+
+        #expect(oldWebView.superview == nil)
+        #expect(controller.webView !== oldWebView)
+        #expect(controller.webView != nil)
+        #expect(controller.overlayEmbeddedView.subviews.contains { $0 === controller.webView })
+        #expect(controller.webViewManager.onPageLoadCompleted != nil)
+    }
+
+    @Test("Creates and attaches a web view when none exists on app restart")
+    @MainActor
+    func onAppRestartClickedCreatesWebViewWhenNoneExists() {
+        let controller = makeController { _ in }
+        prepareForAppRestart(controller)
+
+        controller.onAppRestartClicked(url: "https://example.com/restarted")
+
+        #expect(controller.webView != nil)
+        #expect(controller.overlayEmbeddedView.subviews.contains { $0 === controller.webView })
+        #expect(controller.webViewManager.onPageLoadCompleted != nil)
     }
 
     @MainActor
@@ -290,5 +325,14 @@ struct PopupControllerTests {
         controller.popupView.addSubview(controller.topRowView)
         controller.topRowView.addSubview(controller.dividerTop)
         controller.popupView.addSubview(controller.overlayEmbeddedView)
+    }
+
+    @MainActor
+    private func prepareForAppRestart(_ controller: PopupController) {
+        prepareForEmbeddedOverlay(controller)
+        controller.webViewManager = BreadFinancialWebViewInterstitial(
+            logger: Logger(),
+            callback: { _ in }
+        )
     }
 }
