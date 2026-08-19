@@ -40,7 +40,7 @@ jobs:
             -scheme BreadPartnersSDK_UnitTests \
             -destination 'platform=iOS Simulator,name=iPhone 17' \
             -parallel-testing-enabled YES \
-            -maximum-parallel-testing-workers 4 \
+            -maximum-parallel-testing-workers 2 \
             -enableCodeCoverage YES \
             -resultBundlePath UnitTestResults.xcresult
 
