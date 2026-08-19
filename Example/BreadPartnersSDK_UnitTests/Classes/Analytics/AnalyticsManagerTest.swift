@@ -31,6 +31,17 @@ struct AnalyticsManagerTests {
 			""".utf8)
 		)
 	}
+    
+    
+
+    
+    @Test("should store the logger instance passed to the initializer")
+    func analyticsManagerInit() {
+        let logger = Logger()
+        let manager = AnalyticsManager(logger: logger)
+
+        #expect(manager.logger === logger)
+    }
 
 	@Test("setApiKey stores the analytics API key")
 	func setApiKeyStoresValue() {
