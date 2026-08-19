@@ -176,6 +176,16 @@ struct PopupControllerTests {
         #expect(controller.popupView.subviews.contains { $0 === controller.loader })
     }
 
+    @Test("viewDidLoad loads the controller view safely")
+    @MainActor
+    func viewDidLoadLoadsControllerViewSafely() {
+        let controller = makeController { _ in }
+
+        controller.loadViewIfNeeded()
+
+        #expect(controller.isViewLoaded)
+    }
+
     @MainActor
     private func makeController(
         callback: @escaping (BreadPartnerEvents) -> Void
