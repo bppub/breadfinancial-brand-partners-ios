@@ -7,6 +7,10 @@ import WebKit
 @Suite(.serialized)
 struct ChallengeControllerTests {
 
+    private final class SelectorShim: NSObject {
+        @objc func closeButtonTapped() {}
+    }
+
     @MainActor
     private func makeController(
         callback: ((BreadPartnerEvents) -> Void)? = nil,
@@ -45,7 +49,7 @@ struct ChallengeControllerTests {
         controller.loadViewIfNeeded()
         let closeButton = controller.view.subviews.compactMap { $0 as? UIButton }.first
         #expect(closeButton != nil)
-        controller.perform(Selector(("closeButtonTapped")))
+        controller.perform(#selector(SelectorShim.closeButtonTapped))
 
         guard case .popupClosed? = receivedEvent else {
             Issue.record("Expected the close button to emit popupClosed")

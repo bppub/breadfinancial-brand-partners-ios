@@ -3,6 +3,7 @@ import Foundation
 @testable import BreadPartnersSDK
 
 @Suite(.serialized)
+@MainActor
 struct RTPSApiExtensionTests {
 
 	private final class EventBox: @unchecked Sendable {

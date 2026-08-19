@@ -5,6 +5,10 @@ import UIKit
 @Suite(.serialized)
 struct BreadPartnerLinkTextTests {
 
+	private final class SelectorShim: NSObject {
+		@objc func handleTap(_ gesture: UITapGestureRecognizer) {}
+	}
+
 	private final class FixedLocationTapGestureRecognizer: UITapGestureRecognizer {
 		private let fixedLocation: CGPoint
 
@@ -88,7 +92,7 @@ struct BreadPartnerLinkTextTests {
 			)
 			view.layoutIfNeeded()
 			let gesture = FixedLocationTapGestureRecognizer(location: CGPoint(x: 10, y: 10))
-			_ = view.perform(Selector("handleTap:"), with: gesture)
+			_ = view.perform(#selector(SelectorShim.handleTap(_:)), with: gesture)
 		}
 
 		#expect(received == link)
@@ -105,7 +109,7 @@ struct BreadPartnerLinkTextTests {
 			)
 			view.layoutIfNeeded()
 			let gesture = FixedLocationTapGestureRecognizer(location: CGPoint(x: 10, y: 10))
-			_ = view.perform(Selector("handleTap:"), with: gesture)
+			_ = view.perform(#selector(SelectorShim.handleTap(_:)), with: gesture)
 		}
 
 		#expect(received.isEmpty)
@@ -122,7 +126,7 @@ struct BreadPartnerLinkTextTests {
 			)
 			view.layoutIfNeeded()
 			let gesture = FixedLocationTapGestureRecognizer(location: CGPoint(x: 199, y: 39))
-			_ = view.perform(Selector("handleTap:"), with: gesture)
+			_ = view.perform(#selector(SelectorShim.handleTap(_:)), with: gesture)
 		}
 
 		#expect(received.isEmpty)

@@ -2,6 +2,7 @@ import Testing
 @testable import BreadPartnersSDK
 
 @Suite
+@MainActor
 struct BreadPartnersSDKTests {
 
     private final class EventBox: @unchecked Sendable {
