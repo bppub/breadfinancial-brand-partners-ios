@@ -43,6 +43,13 @@ jobs:
             -maximum-parallel-testing-workers 2 \
             -enableCodeCoverage YES \
             -resultBundlePath UnitTestResults.xcresult
+      
+      - name: Upload unit test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-results
+          path: UnitTestResults.xcresult
 
       - name: Run UI Tests
         run: |
@@ -52,6 +59,13 @@ jobs:
             -destination 'platform=iOS Simulator,name=iPhone 17' \
             -enableCodeCoverage YES \
             -resultBundlePath UITestResults.xcresult
+
+      - name: Upload UI test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-test-results
+          path: UITestResults.xcresult
 
       - name: Publish combined coverage check run
         uses: actions/github-script@v7
