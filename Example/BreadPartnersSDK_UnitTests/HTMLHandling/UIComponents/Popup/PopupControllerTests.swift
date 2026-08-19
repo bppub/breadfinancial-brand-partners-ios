@@ -186,6 +186,68 @@ struct PopupControllerTests {
         #expect(controller.isViewLoaded)
     }
 
+    @Test("Creates and attaches a web view for an embedded overlay")
+    @MainActor
+    func displayEmbeddedOverlayCreatesWebView() {
+        let controller = makeController { _ in }
+        var popupModel = controller.popupModel
+        popupModel.webViewUrl = "https://example.com/experience"
+        prepareForEmbeddedOverlay(controller)
+
+        controller.displayEmbeddedOverlay(popupModel)
+
+        #expect(!controller.overlayProductView.isHidden)
+        #expect(!controller.overlayEmbeddedView.isHidden)
+        #expect(controller.webViewManager != nil)
+        #expect(controller.webView != nil)
+        #expect(controller.overlayEmbeddedView.subviews.contains { $0 === controller.webView })
+    }
+
+    @Test("Creates the embedded web view when the brand logo URL is invalid")
+    @MainActor
+    func displayEmbeddedOverlayContinuesWhenBrandLogoURLIsInvalid() {
+        let controller = makeController { _ in }
+        var popupModel = controller.popupModel
+        popupModel.webViewUrl = "https://example.com/experience"
+        popupModel.brandLogoUrl = "not a valid URL"
+        prepareForEmbeddedOverlay(controller)
+
+        controller.displayEmbeddedOverlay(popupModel: popupModel)
+
+        #expect(controller.webView != nil)
+        #expect(controller.brandLogo.image == nil)
+    }
+
+    @Test("Assigns the popup controller as the web view restart listener")
+    @MainActor
+    func displayEmbeddedOverlayAssignsRestartListener() {
+        let controller = makeController { _ in }
+        var popupModel = controller.popupModel
+        popupModel.webViewUrl = "https://example.com/experience"
+        prepareForEmbeddedOverlay(controller)
+
+        controller.displayEmbeddedOverlay(popupModel: popupModel)
+
+        #expect(controller.webViewManager.appRestartListener != nil)
+    }
+
+    @Test("Preserves an existing web view when the replacement URL is invalid")
+    @MainActor
+    func displayEmbeddedOverlayPreservesWebViewForInvalidURL() {
+        let controller = makeController { _ in }
+        var popupModel = controller.popupModel
+        popupModel.webViewUrl = "not a valid URL"
+        popupModel.brandLogoUrl = "not a valid URL"
+        prepareForEmbeddedOverlay(controller)
+
+        let existingWebView = WKWebView()
+        controller.webView = existingWebView
+
+        controller.displayEmbeddedOverlay(popupModel: popupModel)
+
+        #expect(controller.webView === existingWebView)
+    }
+
     @MainActor
     private func makeController(
         callback: @escaping (BreadPartnerEvents) -> Void
@@ -215,5 +277,18 @@ struct PopupControllerTests {
             logger: Logger(),
             callback: callback
         )
+    }
+
+    @MainActor
+    private func prepareForEmbeddedOverlay(_ controller: PopupController) {
+        controller.popupView = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 480))
+        controller.overlayProductView = UIView()
+        controller.overlayEmbeddedView = UIView()
+        controller.topRowView = UIView()
+        controller.dividerTop = UIView()
+        controller.brandLogo = UIImageView()
+        controller.popupView.addSubview(controller.topRowView)
+        controller.topRowView.addSubview(controller.dividerTop)
+        controller.popupView.addSubview(controller.overlayEmbeddedView)
     }
 }
