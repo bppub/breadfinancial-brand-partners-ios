@@ -5,39 +5,6 @@ import Testing
 @Suite(.serialized)
 struct PlacementApiExtensionTests {
 
-	private final class StubURLProtocol: URLProtocol {
-		static var responseData = Data()
-		static var responseStatusCode = 200
-		static var responseContentType = "application/json"
-
-		override class func canInit(with request: URLRequest) -> Bool {
-			true
-		}
-
-		override class func canonicalRequest(for request: URLRequest) -> URLRequest {
-			request
-		}
-
-		override func startLoading() {
-			guard let url = request.url else {
-				client?.urlProtocol(self, didFailWithError: URLError(.badURL))
-				return
-			}
-
-			let response = HTTPURLResponse(
-				url: url,
-				statusCode: Self.responseStatusCode,
-				httpVersion: nil,
-				headerFields: ["Content-Type": Self.responseContentType]
-			)!
-			client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
-			client?.urlProtocol(self, didLoad: Self.responseData)
-			client?.urlProtocolDidFinishLoading(self)
-		}
-
-		override func stopLoading() {}
-	}
-
 	private final class EventBox: @unchecked Sendable {
 		var event: BreadPartnerEvents?
 	}
@@ -45,7 +12,7 @@ struct PlacementApiExtensionTests {
 	@Test("fetchBrandConfig stores a valid brand configuration")
 	@MainActor
 	func fetchBrandConfigStoresConfiguration() async {
-		await withStubbedResponse(data: Data("{\"config\":{}}".utf8)) {
+		await TestNetworkCoordinator.shared.withResponse(data: Data("{\"config\":{}}".utf8)) {
 			let sdk = BreadPartnersSDK()
 			sdk.integrationKey = "brand-123"
 
@@ -58,7 +25,7 @@ struct PlacementApiExtensionTests {
 	@Test("fetchBrandConfig leaves configuration unset after an API failure")
 	@MainActor
 	func fetchBrandConfigHandlesAPIError() async {
-		await withStubbedResponse(
+		await TestNetworkCoordinator.shared.withResponse(
 			data: Data("{\"message\":\"unavailable\"}".utf8),
 			statusCode: 500
 		) {
@@ -74,7 +41,7 @@ struct PlacementApiExtensionTests {
 	func fetchPlacementDataForwardsResponse() async {
 		let eventBox = EventBox()
 
-		await withStubbedResponse(data: Data("{}".utf8)) {
+		await TestNetworkCoordinator.shared.withResponse(data: Data("{}".utf8)) {
 			await BreadPartnersSDK().fetchPlacementData(
 				merchantConfiguration: MerchantConfiguration(),
 				placementsConfiguration: PlacementConfiguration(),
@@ -92,7 +59,7 @@ struct PlacementApiExtensionTests {
 	func fetchPlacementDataReportsAPIError() async {
 		let eventBox = EventBox()
 
-		await withStubbedResponse(
+		await TestNetworkCoordinator.shared.withResponse(
 			data: Data("{\"message\":\"service unavailable\"}".utf8),
 			statusCode: 503
 		) {
@@ -115,7 +82,7 @@ struct PlacementApiExtensionTests {
 		let eventBox = EventBox()
 		let challengeHTML = "<html>incap_ses challenge</html>"
 
-		await withStubbedResponse(
+		await TestNetworkCoordinator.shared.withResponse(
 			data: Data(challengeHTML.utf8),
 			contentType: "text/html"
 		) {
@@ -230,19 +197,4 @@ struct PlacementApiExtensionTests {
 		#expect(error.localizedDescription == message)
 	}
 
-	private func withStubbedResponse(
-		data: Data,
-		statusCode: Int = 200,
-		contentType: String = "application/json",
-		operation: () async -> Void
-	) async {
-		StubURLProtocol.responseData = data
-		StubURLProtocol.responseStatusCode = statusCode
-		StubURLProtocol.responseContentType = contentType
-		URLProtocol.registerClass(StubURLProtocol.self)
-		defer {
-			URLProtocol.unregisterClass(StubURLProtocol.self)
-		}
-		await operation()
-	}
 }

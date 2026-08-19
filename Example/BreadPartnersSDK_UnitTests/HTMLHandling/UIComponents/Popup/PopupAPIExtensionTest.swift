@@ -6,33 +6,6 @@ import UIKit
 @Suite(.serialized)
 struct PopupAPIExtensionTests {
 
-	private final class StubURLProtocol: URLProtocol {
-		static var responseData = Data()
-		static var responseStatusCode = 200
-		static var responseContentType = "application/json"
-
-		override class func canInit(with request: URLRequest) -> Bool { true }
-		override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
-
-		override func startLoading() {
-			guard let url = request.url else {
-				client?.urlProtocol(self, didFailWithError: URLError(.badURL))
-				return
-			}
-			let response = HTTPURLResponse(
-				url: url,
-				statusCode: Self.responseStatusCode,
-				httpVersion: nil,
-				headerFields: ["Content-Type": Self.responseContentType]
-			)!
-			client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
-			client?.urlProtocol(self, didLoad: Self.responseData)
-			client?.urlProtocolDidFinishLoading(self)
-		}
-
-		override func stopLoading() {}
-	}
-
 	private final class EventBox: @unchecked Sendable {
 		var event: BreadPartnerEvents?
 	}
@@ -82,8 +55,11 @@ struct PopupAPIExtensionTests {
 		<div class="epjs-css-overlay-title">Title</div>
 		<div class="epjs-css-overlay-subtitle">Subtitle</div>
 		<div class="epjs-css-overlay-body-title-bar">Heading</div>
+		<div class="epjs-css-overlay-header">Header</div>
 		<div class="epjs-css-overlay-disclosures">Disclosure</div>
+		<div class="epjs-css-modal-footer" data-overlay-type="EMBEDDED_OVERLAY"></div>
 		<button class="action-button" data-content-fetch="true" data-action-target="modal" data-action-type="SHOW_OVERLAY" data-action-content-id="cta-1" data-location="footer"><span>Continue</span></button>
+		<div class="epjs-css-overlay-body-content"></div>
 		"""
 	}
 
@@ -92,13 +68,17 @@ struct PopupAPIExtensionTests {
 	func fetchWebViewPlacementStoresModel() async {
 		let response = "{\"placementContent\":[{\"contentData\":{\"htmlContent\":\(jsonString(popupHTML))}}]}"
 
-		await withStubbedResponse(data: Data(response.utf8)) {
+		await TestNetworkCoordinator.shared.withResponse(data: Data(response.utf8)) {
 			let controller = makeController()
 			await controller.fetchWebViewPlacement()
 
-			#expect(controller.webViewPlacementModel != nil)
-			#expect(controller.webViewPlacementModel.webViewUrl == "https://example.com/embedded")
-			#expect(controller.webViewPlacementModel.primaryActionButtonAttributes?.buttonText == "Continue")
+			guard let placementModel = controller.webViewPlacementModel else {
+				Issue.record("Expected a decoded popup placement model")
+				return
+			}
+
+			#expect(placementModel.webViewUrl == "https://example.com/embedded")
+			#expect(placementModel.primaryActionButtonAttributes?.buttonText == "Continue")
 		}
 	}
 
@@ -107,7 +87,7 @@ struct PopupAPIExtensionTests {
 	func fetchWebViewPlacementReportsMissingContent() async {
 		let eventBox = EventBox()
 
-		await withStubbedResponse(data: Data("{}".utf8)) {
+		await TestNetworkCoordinator.shared.withResponse(data: Data("{}".utf8)) {
 			let controller = makeController { event in eventBox.event = event }
 			await controller.fetchWebViewPlacement()
 		}
@@ -120,7 +100,7 @@ struct PopupAPIExtensionTests {
 	func fetchWebViewPlacementReportsMalformedResponse() async {
 		let eventBox = EventBox()
 
-		await withStubbedResponse(data: Data("not-json".utf8)) {
+		await TestNetworkCoordinator.shared.withResponse(data: Data("not-json".utf8)) {
 			let controller = makeController { event in eventBox.event = event }
 			await controller.fetchWebViewPlacement()
 		}
@@ -133,7 +113,7 @@ struct PopupAPIExtensionTests {
 	func fetchWebViewPlacementReportsAPIError() async {
 		let eventBox = EventBox()
 
-		await withStubbedResponse(
+		await TestNetworkCoordinator.shared.withResponse(
 			data: Data("{\"message\":\"service unavailable\"}".utf8),
 			statusCode: 503
 		) {
@@ -148,19 +128,6 @@ struct PopupAPIExtensionTests {
 		let data = try! JSONSerialization.data(withJSONObject: [value])
 		let encoded = String(decoding: data, as: UTF8.self)
 		return String(encoded.dropFirst().dropLast())
-	}
-
-	private func withStubbedResponse(
-		data: Data,
-		statusCode: Int = 200,
-		operation: () async -> Void
-	) async {
-		StubURLProtocol.responseData = data
-		StubURLProtocol.responseStatusCode = statusCode
-		StubURLProtocol.responseContentType = "application/json"
-		URLProtocol.registerClass(StubURLProtocol.self)
-		defer { URLProtocol.unregisterClass(StubURLProtocol.self) }
-		await operation()
 	}
 
 	private func expectSDKError(_ event: BreadPartnerEvents?, message: String) {

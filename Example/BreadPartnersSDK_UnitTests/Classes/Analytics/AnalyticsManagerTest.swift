@@ -5,33 +5,6 @@ import Testing
 @Suite(.serialized)
 struct AnalyticsManagerTests {
 
-	private final class StubURLProtocol: URLProtocol {
-		static var responseData = Data("{}".utf8)
-		static var capturedRequest: URLRequest?
-
-		override class func canInit(with request: URLRequest) -> Bool { true }
-		override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
-
-		override func startLoading() {
-			Self.capturedRequest = request
-			guard let url = request.url else {
-				client?.urlProtocol(self, didFailWithError: URLError(.badURL))
-				return
-			}
-			let response = HTTPURLResponse(
-				url: url,
-				statusCode: 200,
-				httpVersion: nil,
-				headerFields: ["Content-Type": "application/json"]
-			)!
-			client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
-			client?.urlProtocol(self, didLoad: Self.responseData)
-			client?.urlProtocolDidFinishLoading(self)
-		}
-
-		override func stopLoading() {}
-	}
-
 	private func makePlacementResponse() throws -> PlacementsResponse {
 		try JSONDecoder().decode(
 			PlacementsResponse.self,
@@ -73,7 +46,7 @@ struct AnalyticsManagerTests {
 		let manager = AnalyticsManager(logger: Logger())
 		manager.setApiKey("analytics-key")
 
-		await withStubbedRequest {
+		await TestNetworkCoordinator.shared.withRequest {
 			await manager.sendViewPlacement(placementResponse: response)
 		}
 
@@ -85,7 +58,7 @@ struct AnalyticsManagerTests {
 		let response = try makePlacementResponse()
 		let manager = AnalyticsManager(logger: Logger())
 
-		await withStubbedRequest {
+		await TestNetworkCoordinator.shared.withRequest {
 			await manager.sendClickPlacement(placementResponse: response)
 		}
 
@@ -100,18 +73,11 @@ struct AnalyticsManagerTests {
 		)
 		let manager = AnalyticsManager(logger: Logger())
 
-		await withStubbedRequest {
+		await TestNetworkCoordinator.shared.withRequest {
 			await manager.sendViewPlacement(placementResponse: emptyResponse)
 		}
 
 		#expect(mirrorValue(manager, key: "apiKey") == "")
-	}
-
-	private func withStubbedRequest(operation: () async -> Void) async {
-		StubURLProtocol.capturedRequest = nil
-		URLProtocol.registerClass(StubURLProtocol.self)
-		defer { URLProtocol.unregisterClass(StubURLProtocol.self) }
-		await operation()
 	}
 
 	private func mirrorValue<T>(_ object: Any, key: String) -> T? {

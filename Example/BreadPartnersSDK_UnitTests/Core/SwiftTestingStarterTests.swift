@@ -1270,12 +1270,13 @@ struct BreadPartnersSDKSwiftTestingCoverage {
         let client = APIClient(logger: Logger())
 
         do {
-            _ = try await client.request(urlString: "not a url")
+            _ = try await client.request(urlString: "ht!tp://bad")
             Issue.record("Expected InvalidURL error")
         } catch {
             let nsError = error as NSError
-            #expect(nsError.domain == "InvalidURL" || nsError.domain == NSURLErrorDomain)
-            #expect(nsError.code == 400 || nsError.code == NSURLErrorUnsupportedURL)
+            #expect(nsError.domain == "InvalidURL")
+            #expect(nsError.code == 400)
+            #expect(nsError.localizedDescription == "The URL provided is invalid.")
         }
     }
 
