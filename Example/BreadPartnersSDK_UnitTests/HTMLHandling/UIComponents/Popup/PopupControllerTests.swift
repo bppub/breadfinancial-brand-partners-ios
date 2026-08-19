@@ -114,6 +114,68 @@ struct PopupControllerTests {
         }
     }
 
+    @Test("Hides close button for RTPS approval")
+    @MainActor
+    func viewDidLayoutSubviewsHidesCloseButtonForRTPSApproval() {
+        let controller = makeController { _ in }
+        controller.popupModel.location = "RTPS-Approval"
+        controller.popupView = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 480))
+        controller.closeButton = UIButton(type: .system)
+
+        controller.viewDidLayoutSubviews()
+
+        #expect(controller.closeButton.isHidden)
+    }
+
+    @Test("Shows close button for a normal popup location")
+    @MainActor
+    func viewDidLayoutSubviewsShowsCloseButtonForNormalLocation() {
+        let controller = makeController { _ in }
+        controller.overlayType = .singleProductOverlay
+        controller.popupModel.location = "checkout"
+        controller.popupView = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 480))
+        controller.closeButton = UIButton(type: .system)
+
+        controller.viewDidLayoutSubviews()
+
+        #expect(!controller.closeButton.isHidden)
+    }
+
+    @Test("Returns safely when popup view is unavailable")
+    @MainActor
+    func viewDidLayoutSubviewsReturnsWhenPopupViewIsNil() {
+        let controller = makeController { _ in }
+
+        controller.viewDidLayoutSubviews()
+
+        #expect(controller.popupView == nil)
+    }
+
+    @Test("Returns safely when popup view has zero bounds")
+    @MainActor
+    func viewDidLayoutSubviewsReturnsWhenPopupViewHasZeroBounds() {
+        let controller = makeController { _ in }
+        controller.popupView = UIView(frame: .zero)
+
+        controller.viewDidLayoutSubviews()
+
+        #expect(controller.loader == nil)
+    }
+
+    @Test("Creates a loader for an embedded overlay")
+    @MainActor
+    func viewDidLayoutSubviewsCreatesLoaderForEmbeddedOverlay() async {
+        let controller = makeController { _ in }
+        controller.popupView = UIView(frame: CGRect(x: 0, y: 0, width: 320, height: 480))
+        controller.closeButton = UIButton(type: .system)
+
+        controller.viewDidLayoutSubviews()
+        await Task.yield()
+
+        #expect(controller.loader != nil)
+        #expect(controller.popupView.subviews.contains { $0 === controller.loader })
+    }
+
     @MainActor
     private func makeController(
         callback: @escaping (BreadPartnerEvents) -> Void
