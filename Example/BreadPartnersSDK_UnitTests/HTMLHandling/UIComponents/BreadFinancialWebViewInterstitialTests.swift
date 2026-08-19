@@ -6,28 +6,39 @@ import WebKit
 @Suite(.serialized)
 struct BreadFinancialWebViewInterstitialTests {
 
-	private final class ScriptMessageShim: NSObject {
-		@objc let body: Any
-		@objc let name: String
+	// Real WKScriptMessage/WKNavigationAction subclasses that override the get-only
+	// properties, avoiding unsafeBitCast which relies on private WebKit object layout
+	// and can break across OS/runtime versions.
+	private final class MockScriptMessage: WKScriptMessage {
+		private let _body: Any
+		private let _name: String
 
-		init(body: Any, name: String = "messageHandler") {
-			self.body = body
-			self.name = name
+		init(body: Any, name: String) {
+			_body = body
+			_name = name
+			super.init()
 		}
+
+		override var body: Any { _body }
+		override var name: String { _name }
 	}
 
-	private final class NavigationActionShim: NSObject {
-		@objc let request: URLRequest
-		@objc let navigationType: WKNavigationType
+	private final class MockNavigationAction: WKNavigationAction {
+		private let _request: URLRequest
+		private let _navigationType: WKNavigationType
 
 		init(request: URLRequest, navigationType: WKNavigationType) {
-			self.request = request
-			self.navigationType = navigationType
+			_request = request
+			_navigationType = navigationType
+			super.init()
 		}
+
+		override var request: URLRequest { _request }
+		override var navigationType: WKNavigationType { _navigationType }
 	}
 
 	private func makeScriptMessage(body: Any, name: String = "messageHandler") -> WKScriptMessage {
-		unsafeBitCast(ScriptMessageShim(body: body, name: name), to: WKScriptMessage.self)
+		MockScriptMessage(body: body, name: name)
 	}
 
 	private func makeNavigationAction(
@@ -42,10 +53,7 @@ struct BreadFinancialWebViewInterstitialTests {
 			mutableRequest.url = nil
 			request = mutableRequest as URLRequest
 		}
-		return unsafeBitCast(
-			NavigationActionShim(request: request, navigationType: navigationType),
-			to: WKNavigationAction.self
-		)
+		return MockNavigationAction(request: request, navigationType: navigationType)
 	}
 
 	private func makeActionBody(type: String, payload: Any? = nil) -> [String: Any] {
