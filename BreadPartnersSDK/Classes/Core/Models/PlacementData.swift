@@ -61,8 +61,8 @@ public class PlacementData {
         self.selectedCardKey = selectedCardKey
         self.upqInSessionToken = upqInSessionToken
         self.financingBuyerId = financingBuyerId
-        self.prequalificationId = financingBuyerId
-        self.prequalCreditLimit = financingBuyerId
+        self.prequalificationId = prequalificationId
+        self.prequalCreditLimit = prequalCreditLimit
     }
 }
 
