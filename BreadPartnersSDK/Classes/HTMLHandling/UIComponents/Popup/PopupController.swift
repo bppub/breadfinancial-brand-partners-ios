@@ -123,8 +123,8 @@ internal class PopupController: UIViewController, AppRestartListener, UITextView
 
         if let url = URL(string: popupModel.webViewUrl) {
             webView = webViewManager.createWebView(with: url)
-            webViewManager.onPageLoadCompleted = { url in
-                self.loader.stopAnimating()
+            webViewManager.onPageLoadCompleted = { [weak self] _ in
+                self?.loader?.stopAnimating()
             }
 
             webView.translatesAutoresizingMaskIntoConstraints = false
@@ -158,7 +158,7 @@ internal class PopupController: UIViewController, AppRestartListener, UITextView
 
         webView = webViewManager.createWebView(with: URL(string: url)!)
         webViewManager.onPageLoadCompleted = { url in
-            self.loader.stopAnimating()
+            self.loader?.stopAnimating()
         }
 
         webView.translatesAutoresizingMaskIntoConstraints = false

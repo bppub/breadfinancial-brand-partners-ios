@@ -5,22 +5,200 @@ on:
     branches:
       - master
 
+concurrency:
+  group: pr-${{ github.event.pull_request.number }}-unit-tests
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  checks: write
+
 jobs:
-  build:
+  tests:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install Xcode
-        run: |
-          sudo xcode-select --install || true
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: |
+            Example/Pods
+            ~/.cocoapods
+            ~/Library/Caches/CocoaPods
+          key: ${{ runner.os }}-pods-${{ hashFiles('Example/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
 
-      - name: Install pods 
-        run: pod install --project-directory=Example 
+      - name: Install pods
+        run: pod install --project-directory=Example
 
       - name: Run Unit Tests
         run: |
           xcodebuild test \
             -workspace Example/BreadPartnersSDK.xcworkspace \
-            -scheme BreadPartnersSDK_Tests \
-            -destination 'platform=iOS Simulator,name=iPhone 17'
+            -scheme BreadPartnersSDK_UnitTests \
+            -destination 'platform=iOS Simulator,name=iPhone 17' \
+            -parallel-testing-enabled YES \
+            -maximum-parallel-testing-workers 2 \
+            -enableCodeCoverage YES \
+            -resultBundlePath UnitTestResults.xcresult
+      
+      - name: Upload unit test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-results
+          path: UnitTestResults.xcresult
+
+      - name: Run UI Tests
+        run: |
+          xcodebuild test \
+            -workspace Example/BreadPartnersSDK.xcworkspace \
+            -scheme BreadPartnersSDK_UITests \
+            -destination 'platform=iOS Simulator,name=iPhone 17' \
+            -enableCodeCoverage YES \
+            -resultBundlePath UITestResults.xcresult
+
+      - name: Upload UI test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-test-results
+          path: UITestResults.xcresult
+
+      - name: Publish combined coverage check run
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { execSync } = require("node:child_process");
+
+            const escapeCell = (value) => String(value ?? "").replace(/\|/g, "\\|");
+            const toNum = (value) => Number(value || 0);
+
+            const readReport = (path) => {
+              const raw = execSync(`xcrun xccov view --report --json ${path}`, { encoding: "utf8" }).trim();
+              if (!raw) throw new Error(`xccov produced empty output for ${path}`);
+              return JSON.parse(raw);
+            };
+
+            const unit = readReport("UnitTestResults.xcresult");
+            const ui = readReport("UITestResults.xcresult");
+
+            const combinedTargetsByName = new Map();
+            const allTargets = [
+              ...(unit.targets || []),
+              ...(ui.targets || [])
+            ];
+
+            for (const t of allTargets) {
+              const name = String(t.name || "unknown");
+              const coveredLines = toNum(t.coveredLines);
+              const executableLines = toNum(t.executableLines);
+              const prev = combinedTargetsByName.get(name) || { name, covered_lines: 0, executable_lines: 0 };
+              prev.covered_lines += coveredLines;
+              prev.executable_lines += executableLines;
+              combinedTargetsByName.set(name, prev);
+            }
+
+            const targets = Array.from(combinedTargetsByName.values())
+              .filter(t => t.executable_lines > 0)
+              .map(t => ({
+                ...t,
+                line_coverage: (t.covered_lines / t.executable_lines) * 100,
+              }));
+
+            const covered = targets.reduce((sum, t) => sum + t.covered_lines, 0);
+            const executable = targets.reduce((sum, t) => sum + t.executable_lines, 0);
+            const percent = executable > 0 ? ((covered / executable) * 100).toFixed(2) : "0.00";
+
+            targets.sort((a, b) => a.line_coverage - b.line_coverage);
+            const targetCount = targets.length;
+
+            const topLowCoverage = targets.slice(0, 12);
+            const targetTable = topLowCoverage.length === 0
+              ? "No target-level coverage details were returned."
+              : [
+                  "### Lowest Coverage Targets",
+                  "| Target | Coverage | Covered / Executable |",
+                  "| --- | ---: | ---: |",
+                  ...topLowCoverage.map(t => `| ${escapeCell(t.name)} | ${t.line_coverage.toFixed(2)}% | ${t.covered_lines} / ${t.executable_lines} |`)
+                ].join("\n");
+
+            // Build file-level coverage to help prioritize next work.
+            const filesByPath = new Map();
+            for (const t of allTargets) {
+              const targetName = String(t.name || "unknown");
+              const files = Array.isArray(t.files) ? t.files : [];
+              for (const f of files) {
+                const path = String(f.path || f.name || "unknown");
+                const coveredLines = toNum(f.coveredLines);
+                const executableLines = toNum(f.executableLines);
+                const prev = filesByPath.get(path) || {
+                  path,
+                  covered_lines: 0,
+                  executable_lines: 0,
+                  targets: new Set(),
+                };
+                prev.covered_lines += coveredLines;
+                prev.executable_lines += executableLines;
+                prev.targets.add(targetName);
+                filesByPath.set(path, prev);
+              }
+            }
+
+            const files = Array.from(filesByPath.values())
+              .filter(f => f.executable_lines > 0)
+              .filter(f => !f.path.includes("/Pods/") && !f.path.startsWith("Pods/"))
+              .map(f => ({
+                path: f.path,
+                covered_lines: f.covered_lines,
+                executable_lines: f.executable_lines,
+                line_coverage: (f.covered_lines / f.executable_lines) * 100,
+                targets: Array.from(f.targets).sort(),
+              }))
+              .sort((a, b) => a.line_coverage - b.line_coverage);
+
+            const lowestFiles = files.slice(0, 20);
+            const fileTable = lowestFiles.length === 0
+              ? "No file-level coverage details were returned."
+              : [
+                  "### Lowest Coverage Files (Non-Pods)",
+                  "| File | Coverage | Covered / Executable | Target(s) |",
+                  "| --- | ---: | ---: | --- |",
+                  ...lowestFiles.map(f => `| ${escapeCell(f.path)} | ${f.line_coverage.toFixed(2)}% | ${f.covered_lines} / ${f.executable_lines} | ${escapeCell(f.targets.join(", "))} |`)
+                ].join("\n");
+
+            const summary = `Line coverage: **${percent}%**`;
+            const text = [
+              "| Metric | Value |",
+              "| --- | ---: |",
+              `| Line Coverage | **${percent}%** |`,
+              `| Covered Lines | ${covered} |`,
+              `| Executable Lines | ${executable} |`,
+              `| Targets in Report | ${targetCount} |`,
+              `| Files in Report (Non-Pods, executable > 0) | ${files.length} |`,
+              "| Test Runs Combined | Unit + UI |",
+              `| Workflow Run | ${context.runId} |`,
+              `| Commit | ${context.sha.slice(0, 7)} |`,
+              "",
+              targetTable,
+              "",
+              fileTable,
+              "",
+              "Source: `UnitTestResults.xcresult` + `UITestResults.xcresult`"
+            ].join("\n");
+
+            await github.rest.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: "Coverage (Combined)",
+              head_sha: context.payload.pull_request.head.sha,
+              status: "completed",
+              conclusion: "success",
+              output: {
+                title: "Coverage",
+                summary,
+                text
+              }
+            });

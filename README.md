@@ -33,6 +33,24 @@ Ensure you have the following tools installed:
 - **CocoaPods** (1.16.1 or greater)
 - **iOS Minimum Deployment Target** (15.0)
 
+## Development and Testing
+
+For faster iterative testing when using something other than Xcode, build the test bundle once and then run selected test suites without rebuilding:
+
+```bash
+xcodebuild build-for-testing \
+    -workspace Example/BreadPartnersSDK.xcworkspace \
+    -scheme BreadPartnersSDK_UnitTests \
+    -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.5'
+
+xcodebuild test-without-building \
+    -workspace Example/BreadPartnersSDK.xcworkspace \
+    -scheme BreadPartnersSDK_UnitTests \
+    -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.5' \
+    -only-testing:BreadPartnersSDK_UnitTests/OfferResponseTests \
+    -enableCodeCoverage NO
+```
+
 ---
 
 ### Access The Bread Financial Brand Partners SDK
